@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from 'src/interface/users.interface';
@@ -9,6 +13,8 @@ import ms from 'ms';
 import { genSaltSync, hashSync } from 'bcryptjs';
 import { UserLoginDto } from './dto/login-user.dto';
 import { UserService } from 'src/user/user.service';
+import { UpdatePasswordDto } from 'src/user/dto/update-password.dto';
+import { BanUserDto } from 'src/user/dto/ban-user.dto';
 
 // import { RolesService } from 'src/roles/roles.service';
 
@@ -85,66 +91,83 @@ export class AuthService {
   async validateUser(username: string, password: string) {
     return await this.userService.login(username, password);
   }
-  // async register(regiterDto: RegisterDto) {
-  //   const newUser = await this.adminsService.register(regiterDto);
-  //   return {
-  //     id: newUser?.id,
-  //     email: newUser?.email,
-  //     name: newUser?.name,
-  //   };
-  // }
 
-  // async processNewToken(request: Request, response: Response) {
-  //   try {
-  //     const refreshToken = request.cookies['refresh_token'];
-  //     this.jwtService.verify(refreshToken, {
-  //       secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-  //     });
-  //     const user = await this.adminsService.findOneByRefreshToken(refreshToken);
-  //     if (user) {
-  //       const { id, email, name, role } = user;
-  //       const payload = {
-  //         sub: 'token login',
-  //         iss: 'from server',
-  //         id,
-  //         email,
-  //         name,
-  //         role,
-  //       };
+  async processNewToken(request: Request, response: Response) {
+    const refreshTokenFromCookie = request.cookies['refresh_token'];
 
-  //       const refreshToken = this.createRefreshToken(payload);
+    if (!refreshTokenFromCookie) {
+      throw new BadRequestException('Refresh token is missing');
+    }
 
-  //       // update user with refresh token
-  //       await this.adminsService.updateUserToken(user.id, refreshToken);
+    try {
+      // Xác minh refresh token
+      this.jwtService.verify(refreshTokenFromCookie, {
+        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+      });
 
-  //       // set refresh token as cookie
-  //       response.clearCookie('refresh_token');
-  //       response.cookie('refresh_token', refreshToken, {
-  //         httpOnly: true,
-  //         secure: true,
-  //         sameSite: 'none',
-  //         maxAge: ms(this.configService.get<string>('JWT_REFRESH_EXPIRE')),
-  //       });
-  //       return {
-  //         access_token: this.jwtService.sign(payload),
-  //         user: {
-  //           id,
-  //           email,
-  //           name,
-  //           role,
-  //         },
-  //       };
-  //     } else {
-  //       throw new BadRequestException('Invalid refresh token');
-  //     }
-  //   } catch (error) {
-  //     throw new BadRequestException('Invalid refresh token');
-  //   }
-  // }
+      // Tìm user từ refresh token
+      const user = await this.userService.findOneByRefreshToken(
+        refreshTokenFromCookie,
+      );
+      if (!user) {
+        throw new BadRequestException(
+          'Refresh token not associated with any user',
+        );
+      }
+
+      const { id, email, name, role, isBan } = user;
+      const payload = {
+        sub: 'token login',
+        iss: 'from server',
+        id,
+        email,
+        name,
+        role,
+        isBan,
+      };
+
+      // Tạo token mới
+      const newRefreshToken = this.createRefreshToken(payload);
+
+      // Lưu refresh token mới vào DB
+      await this.userService.updateUserToken(user.id, newRefreshToken);
+
+      // Gửi lại cookie
+      response.clearCookie('refresh_token');
+      response.cookie('refresh_token', newRefreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: ms(this.configService.get<string>('JWT_REFRESH_EXPIRE')),
+      });
+
+      return {
+        access_token: this.jwtService.sign(payload),
+        user: { id, email, name, role, isBan },
+      };
+    } catch (error) {
+      throw new BadRequestException('Invalid or expired refresh token');
+    }
+  }
 
   async logout(user: IUser, response: Response) {
     await this.userService.updateRefreshToken(user.id, '');
     response.clearCookie('refresh_token');
-    return null;
+    return true;
+  }
+  async updatePassword(userId: string, updatePasswordDto: UpdatePasswordDto) {
+    await this.userService.updatePassword(userId, updatePasswordDto);
+    return true;
+  }
+  async updateStatusUser(banUserDto: BanUserDto) {
+    const user = await this.userService.findOneById(banUserDto.userId);
+    if (user.role == 'Guest')
+      return this.userService.updateStatusUser(banUserDto);
+    else {
+      throw new ForbiddenException('You do not have permission');
+    }
+  }
+  async updateAdmin(banUserDto: BanUserDto) {
+    return this.userService.updateStatusUser(banUserDto);
   }
 }

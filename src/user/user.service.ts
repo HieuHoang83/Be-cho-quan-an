@@ -1,8 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { BanUserDto } from './dto/ban-user.dto';
 
 @Injectable()
 export class UserService {
@@ -19,17 +25,44 @@ export class UserService {
 
   // ✅ Thêm user mới vào database
   async create(createUserDto: CreateUserDto) {
-    const user = await this.prismaService.user.findUnique({
+    const exists = await this.prismaService.user.findUnique({
       where: { email: createUserDto.email },
     });
-    if (user)
+    if (exists)
       throw new BadRequestException({ message: 'Email already exists' });
 
     createUserDto.password = this.hashPassword(createUserDto.password);
     try {
-      return await this.prismaService.user.create({
-        data: createUserDto,
-      });
+      // Nếu là Guest
+      if (createUserDto.role === 'Guest') {
+        let user = await this.prismaService.user.create({
+          data: createUserDto,
+        });
+        await this.prismaService.guest.create({
+          data: {
+            userId: user.id,
+            gender: null,
+            address: null,
+            points: null,
+            role: 'Normal',
+          },
+        });
+        return user;
+      }
+      if (createUserDto.role === 'Assistant Admin') {
+        let user = await this.prismaService.user.create({
+          data: {
+            ...createUserDto, // Dữ liệu từ CreateUserDto
+            isBan: true, // Gán giá trị isBan là true khi tạo tài khoản
+          },
+        });
+        await this.prismaService.admin.create({
+          data: {
+            userId: user.id,
+          },
+        });
+        return user;
+      }
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -86,16 +119,7 @@ export class UserService {
   }
 
   // ✅ Cập nhật thông tin user
-  async update(id: string, updateUserDto: UpdateUserDto) {
-    try {
-      return await this.prismaService.user.update({
-        where: { id },
-        data: updateUserDto,
-      });
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
+
   async updateRefreshToken(userId: string, refreshToken: string | null) {
     try {
       return await this.prismaService.user.update({
@@ -107,13 +131,102 @@ export class UserService {
     }
   }
   // ✅ Xóa user theo ID
-  async remove(id: string) {
+  async update(userId: string, updateUserDto: UpdateUserDto) {
     try {
-      return await this.prismaService.user.delete({
-        where: { id },
+      // Kiểm tra nếu có người dùng với ID này
+      const user = await this.prismaService.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException({ message: 'User not found' });
+      }
+
+      // Cập nhật thông tin người dùng
+      return await this.prismaService.user.update({
+        where: { id: userId },
+        data: updateUserDto,
       });
     } catch (error) {
-      throw new BadRequestException('User not found or already deleted');
+      throw new BadRequestException(error.message);
     }
+  }
+  async updatePassword(userId: string, updatePasswordDto: UpdatePasswordDto) {
+    try {
+      // Kiểm tra nếu có người dùng với ID này
+      const user = await this.prismaService.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException({ message: 'User not found' });
+      }
+
+      // Kiểm tra mật khẩu cũ
+      if (user.password !== this.hashPassword(updatePasswordDto.oldPassword)) {
+        throw new BadRequestException({ message: 'Old password is incorrect' });
+      }
+
+      // Cập nhật mật khẩu mới
+      const hashedPassword = this.hashPassword(updatePasswordDto.newPassword);
+      return await this.prismaService.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async updateStatusUser(banUserDto: BanUserDto) {
+    try {
+      // Kiểm tra nếu có người dùng với ID này
+      const user = await this.prismaService.user.findUnique({
+        where: { id: banUserDto.userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException({ message: 'User not found' });
+      }
+
+      // Cập nhật trạng thái cấm/mở khóa người dùng
+      return await this.prismaService.user.update({
+        where: { id: banUserDto.userId },
+        data: { isBan: banUserDto.isBan },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async remove(userId: string) {
+    try {
+      // Kiểm tra nếu có người dùng với ID này
+      const user = await this.prismaService.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException({ message: 'User not found' });
+      }
+
+      // Xóa người dùng
+      return await this.prismaService.user.delete({
+        where: { id: userId },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async findOneByRefreshToken(token: string) {
+    return this.prismaService.user.findFirst({
+      where: {
+        refreshToken: token,
+      },
+    });
+  }
+  async updateUserToken(userId: string, refreshToken: string) {
+    return this.prismaService.user.update({
+      where: { id: userId },
+      data: { refreshToken },
+    });
   }
 }

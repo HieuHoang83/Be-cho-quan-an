@@ -41,7 +41,7 @@ model Guest {
   gender    String?
   address   String?
   points    Int?
-  role      String
+  role      String     @default("Normal")
   carts     Cart?      @relation(name: "GuestCart")
   orders    Order[]
   favorites Favorite[]
@@ -49,15 +49,13 @@ model Guest {
 }
 
 model Admin {
-  id           String    @id @default(uuid())
-  managerId    String?
-  user         User?     @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
-  userId       String?   @unique // Khoá ngoại
-  manager      Admin?    @relation("AdminManager", fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subordinates Admin[]   @relation("AdminManager")
-  vouchers     Voucher[]
-  posts        Post[]
-  dishs        Dish[]
+  id     String  @id @default(uuid())
+  user   User?   @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  userId String? @unique // Khoá ngoại
+
+  vouchers Voucher[]
+  posts    Post[]
+  dishs    Dish[]
 }
 
 model Address {

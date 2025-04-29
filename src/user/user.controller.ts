@@ -33,33 +33,24 @@ export class UserController {
   }
 
   @Get()
-  @Roles('STUDENT')
+  @Roles('Assistant Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)
   @ResponseMessage('Find many users')
   findAll(@User() user: IUser) {
-    return true;
-    // Có thể lọc hoặc phân trang nếu cần
-    // return this.userService.findAll();
+    return this.userService.findAll();
   }
-  // @Patch()
-  // @ResponseMessage('Update user information')
-  // update(@User() user: IUser, @Body() updateUserDto: UpdateUserDto) {
-  //   // Lấy id từ đối tượng user đã được lấy từ decorator @User()
-  //   return this.userService.update(user.id, updateUserDto);
-  // }
-  // @Patch('password')
-  // @ResponseMessage('Update password')
-  // updatePassword(@User() user: IUser, @Body() updatePasswordDto: UpdatePasswordDto) {
-  //   return this.userService.updatePassword(user.id, updatePasswordDto);
-  // }
-  // @Patch('ban')
-  // @ResponseMessage('Ban or unban user')
-  // banUser(@User() user: IUser, @Body() banUserDto: BanUserDto) {
-  //   return this.userService.banUser(user.id, banUserDto);
-  // }
-  // @Delete()
-  // @ResponseMessage('Delete user')
-  // remove(@User() user: IUser) {
-  //   return this.userService.remove(user.id);
-  // }
+  @Patch()
+  @ResponseMessage('Update user information')
+  update(@User() user: IUser, @Body() updateUserDto: UpdateUserDto) {
+    // Lấy id từ đối tượng user đã được lấy từ decorator @User()
+    return this.userService.update(user.id, updateUserDto);
+  }
+
+  @Delete(':id')
+  @Roles('Assistant Admin', 'Assistant Admin')
+  @UseGuards(RolesGuard)
+  @ResponseMessage('Delete user')
+  remove(@Param('id') id: string) {
+    return this.userService.remove(id);
+  }
 }

@@ -1,4 +1,10 @@
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail({}, { message: 'Invalid email format' })
@@ -12,6 +18,9 @@ export class CreateUserDto {
   name: string;
 
   @IsString({ message: 'Role must be a string' })
+  @IsIn(['Guest', 'Assistant Admin'], {
+    message: 'Role must be either "Guest" or "Assistant Admin"',
+  })
   role: string;
 
   @IsOptional()

@@ -6,6 +6,7 @@ import {
   Body,
   Res,
   Req,
+  Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public, ResponseMessage, User } from 'src/decorators/customize';
@@ -15,6 +16,10 @@ import { Request, Response } from 'express';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register-user.dto';
 import { UserLoginDto } from './dto/login-user.dto';
+import { UpdatePasswordDto } from 'src/user/dto/update-password.dto';
+import { Roles } from 'src/decorators/roles.decorator';
+import { BanUserDto } from 'src/user/dto/ban-user.dto';
+import { RolesGuard } from 'src/core/roles.guard';
 
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
@@ -30,37 +35,44 @@ export class AuthController {
   ) {
     return this.authService.login(userLoginDto, response);
   }
+  @Patch('password')
+  @ResponseMessage('Update password')
+  updatePassword(
+    @User() user: IUser,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    return this.authService.updatePassword(user.id, updatePasswordDto);
+  }
+  @Patch('statusUser')
+  @Roles('Assistant Admin', 'Assistant Admin')
+  @UseGuards(RolesGuard)
+  @ResponseMessage('Ban or unban user')
+  updateAdmin(@Body() banUserDto: BanUserDto) {
+    return this.authService.updateStatusUser(banUserDto);
+  }
+  @Patch('statusAdmin')
+  @Roles('Super Admin')
+  @UseGuards(RolesGuard)
+  @ResponseMessage('Ban or unban Assistant Admin')
+  updateStatusUser(@Body() banUserDto: BanUserDto) {
+    return this.authService.updateAdmin(banUserDto);
+  }
+  @Public()
+  @Get('refresh')
+  @ResponseMessage('Get profile by refresh token')
+  hanldeRefreshToken(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.authService.processNewToken(request, response);
+  }
 
-  // @Get('account')
-  // @ResponseMessage('Get profile success')
-  // getProfile(@User() user: IUser) {
-  //   return user;
-  // }
-
-  // @Public()
-  // @UseGuards(UniqueGmail)
-  // @Post('register')
-  // @ResponseMessage('Register success')
-  // handleRegister(@Body() regiterDto: RegisterDto) {
-  //   return this.authService.register(regiterDto);
-  // }
-
-  // @Public()
-  // @Get('refresh')
-  // @ResponseMessage('Get profile by refresh token')
-  // hanldeRefreshToken(
-  //   @Req() request: Request,
-  //   @Res({ passthrough: true }) response: Response,
-  // ) {
-  //   return this.authService.processNewToken(request, response);
-  // }
-
-  // @Get('logout')
-  // @ResponseMessage('Log out success')
-  // handleLogout(
-  //   @User() user: IUser,
-  //   @Res({ passthrough: true }) response: Response,
-  // ) {
-  //   return this.authService.logout(user, response);
-  // }
+  @Get('logout')
+  @ResponseMessage('Log out success')
+  handleLogout(
+    @User() user: IUser,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.authService.logout(user, response);
+  }
 }
