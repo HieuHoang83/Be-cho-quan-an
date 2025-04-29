@@ -24,7 +24,7 @@ export class UserService {
     });
     if (user)
       throw new BadRequestException({ message: 'Email already exists' });
-    
+
     createUserDto.password = this.hashPassword(createUserDto.password);
     try {
       return await this.prismaService.user.create({

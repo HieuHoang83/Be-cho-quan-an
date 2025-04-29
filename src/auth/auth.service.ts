@@ -46,24 +46,35 @@ export class AuthService {
     return refreshToken;
   }
   async login(userLoginDto: UserLoginDto, response: Response) {
-    const { username, password } = userLoginDto;
+    const { email, password } = userLoginDto;
     password;
     let user: any;
-    user = await this.userService.login(username, password);
+    user = await this.userService.login(email, password);
     let refresh_token = this.createRefreshToken({
       id: user?.id,
       email: user?.email,
       name: user?.name,
+      role: user?.role,
+      isBan: user?.isBan,
     });
     let access_token = this.createAccessToken({
       id: user?.id,
       email: user?.email,
       name: user?.name,
+      role: user?.role,
+      isBan: user?.isBan,
     });
     return {
       user: {
         email: user?.email,
         name: user?.name,
+        password: user?.password,
+        isBan: user?.isBan,
+        role: user?.role,
+        avatar: user?.avatar,
+        phone: user?.phone,
+        // Nếu muốn lấy luôn quan hệ
+        notifications: user?.notifications,
       },
       token: {
         refresh_token: refresh_token,

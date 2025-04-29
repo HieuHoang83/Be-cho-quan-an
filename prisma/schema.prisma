@@ -14,7 +14,7 @@ model User {
   email         String    @unique
   password      String
   createdAt     DateTime  @default(now())
-  isBan         Boolean?
+  isBan         Boolean?  @default(false)
   role          String
   refreshToken  String?
   avatar        String?
@@ -22,6 +22,7 @@ model User {
   admin         Admin?    @relation
   Guest         Guest?    @relation
   address       Address[]
+  phone         String?
 }
 
 model Notify {
@@ -37,7 +38,6 @@ model Guest {
   id        String     @id @default(uuid())
   user      User?      @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
   userId    String?    @unique // Khoá ngoại
-  phone     String?
   gender    String?
   address   String?
   points    Int?
@@ -46,16 +46,6 @@ model Guest {
   orders    Order[]
   favorites Favorite[]
   reviews   Review[]
-}
-
-model Address {
-  id      String  @id @default(uuid())
-  phone   String
-  address String
-  name    String
-  user    User?   @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
-  userId  String? @unique // Khoá ngoại
-  orders  Order[]
 }
 
 model Admin {
@@ -68,6 +58,16 @@ model Admin {
   vouchers     Voucher[]
   posts        Post[]
   dishs        Dish[]
+}
+
+model Address {
+  id      String  @id @default(uuid())
+  phone   String
+  address String
+  name    String
+  user    User?   @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  userId  String? @unique // Khoá ngoại
+  orders  Order[]
 }
 
 model Action {

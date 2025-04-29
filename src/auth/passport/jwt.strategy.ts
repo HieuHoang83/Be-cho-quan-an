@@ -16,11 +16,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   // trả về response sau khi xác thực token thành công
   async validate(payload: IUser) {
-    const { id, email, name } = payload;
+    const { id, email, name, isBan, role } = payload;
+
     return {
       id,
       email,
       name,
+      isBan,
+      role,
     };
   }
 }
