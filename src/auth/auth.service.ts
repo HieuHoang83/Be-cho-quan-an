@@ -15,6 +15,7 @@ import { UserLoginDto } from './dto/login-user.dto';
 import { UserService } from 'src/user/user.service';
 import { UpdatePasswordDto } from 'src/user/dto/update-password.dto';
 import { BanUserDto } from 'src/user/dto/ban-user.dto';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 // import { RolesService } from 'src/roles/roles.service';
 
@@ -169,5 +170,11 @@ export class AuthService {
   }
   async updateAdmin(banUserDto: BanUserDto) {
     return this.userService.updateStatusUser(banUserDto);
+  }
+  async findGuests(paginateInfo: PaginateInfo) {
+    return this.userService.findGuests(paginateInfo);
+  }
+  async findAssistantAdmins(paginateInfo: PaginateInfo) {
+    return this.userService.findAssistantAdmins(paginateInfo);
   }
 }

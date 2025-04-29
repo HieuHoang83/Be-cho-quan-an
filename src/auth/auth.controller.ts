@@ -20,6 +20,8 @@ import { UpdatePasswordDto } from 'src/user/dto/update-password.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { BanUserDto } from 'src/user/dto/ban-user.dto';
 import { RolesGuard } from 'src/core/roles.guard';
+import { GetPaginateInfo } from 'src/core/query.guard';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
@@ -44,7 +46,7 @@ export class AuthController {
     return this.authService.updatePassword(user.id, updatePasswordDto);
   }
   @Patch('statusUser')
-  @Roles('Assistant Admin', 'Assistant Admin')
+  @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)
   @ResponseMessage('Ban or unban user')
   updateAdmin(@Body() banUserDto: BanUserDto) {
@@ -74,5 +76,19 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     return this.authService.logout(user, response);
+  }
+  @Get('/guest')
+  @Roles('Super Admin', 'Assistant Admin')
+  @UseGuards(RolesGuard)
+  @ResponseMessage('Find many users')
+  findGuests(@GetPaginateInfo() paginateInfo: PaginateInfo) {
+    return this.authService.findGuests(paginateInfo);
+  }
+  @Get('/admin')
+  @Roles('Super Admin')
+  @UseGuards(RolesGuard)
+  @ResponseMessage('Find many users')
+  findAssistantAdmins(@GetPaginateInfo() paginateInfo: PaginateInfo) {
+    return this.authService.findAssistantAdmins(paginateInfo);
   }
 }

@@ -1,24 +1,13 @@
-import { Injectable, CanActivate, ExecutionContext, BadRequestException } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
-@Injectable()
-export class CheckQueryForPagination implements CanActivate {
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<any> {
-    const request = context.switchToHttp().getRequest();
-    const limit = request.query.limit ? Number(request.query.limit) : null;
-    const page = request.query.page ? Number(request.query.page) : null;
+export const GetPaginateInfo = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    const page = Number(request.query.page) || 1; // Trang hiện tại (mặc định là 1)
+    const limit = Number(request.query.limit) || 10; // Số lượng mục trên mỗi trang (mặc định là 10)
 
-    // Check if limit is present and if it's a valid positive integer
-    if (limit !== null && (!Number.isInteger(limit) || limit <= 0)) {
-      throw new BadRequestException('Limit must be a positive integer');
-    }
+    const offset = (page - 1) * limit; // Tính toán offset để phân trang
 
-    // Check if page is present and if it's a valid positive integer
-    if (page !== null && (!Number.isInteger(page) || page <= 0)) {
-      throw new BadRequestException('Page must be a positive integer');
-    }
-
-    return true;
-  }
-}
+    return { page, limit, offset };
+  },
+);

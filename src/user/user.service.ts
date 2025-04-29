@@ -9,6 +9,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { BanUserDto } from './dto/ban-user.dto';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Injectable()
 export class UserService {
@@ -69,14 +70,36 @@ export class UserService {
   }
 
   // ✅ Lấy danh sách tất cả users
-  async findAll() {
+  async findGuests(paginateInfo: {
+    page: number;
+    limit: number;
+    offset: number;
+  }) {
     try {
-      return await this.prismaService.user.findMany();
+      return await this.prismaService.user.findMany({
+        where: { role: 'Guest' }, // Điều kiện lấy người dùng có role là 'Guest'
+        skip: paginateInfo.offset, // Bỏ qua các bản ghi trước offset
+        take: paginateInfo.limit, // Lấy số bản ghi theo limit
+      });
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
-
+  async findAssistantAdmins(paginateInfo: {
+    page: number;
+    limit: number;
+    offset: number;
+  }) {
+    try {
+      return await this.prismaService.user.findMany({
+        where: { role: 'Assistant Admin' }, // Điều kiện lấy người dùng có role là 'Assistant Admin'
+        skip: paginateInfo.offset, // Bỏ qua các bản ghi trước offset
+        take: paginateInfo.limit, // Lấy số bản ghi theo limit
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
   async findOneById(id: string) {
     try {
       const user = await this.prismaService.user.findUnique({

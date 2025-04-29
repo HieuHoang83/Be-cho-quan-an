@@ -19,6 +19,8 @@ import { BanUserDto } from './dto/ban-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/core/roles.guard';
+import { PaginateInfo } from 'src/interface/paginate.interface';
+import { GetPaginateInfo } from 'src/core/query.guard';
 
 @ApiTags('users')
 @Controller({ path: 'users', version: '1' })
@@ -32,13 +34,6 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get()
-  @Roles('Assistant Admin', 'Assistant Admin')
-  @UseGuards(RolesGuard)
-  @ResponseMessage('Find many users')
-  findAll(@User() user: IUser) {
-    return this.userService.findAll();
-  }
   @Patch()
   @ResponseMessage('Update user information')
   update(@User() user: IUser, @Body() updateUserDto: UpdateUserDto) {
@@ -47,7 +42,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  @Roles('Assistant Admin', 'Assistant Admin')
+  @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)
   @ResponseMessage('Delete user')
   remove(@Param('id') id: string) {
