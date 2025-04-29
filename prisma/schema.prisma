@@ -1,0 +1,190 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  password      String
+  createdAt     DateTime  @default(now())
+  isBan         Boolean?
+  role          String
+  refreshToken  String?
+  avatar        String?
+  notifications Notify[]
+  admin         Admin?    @relation
+  Guest         Guest?    @relation
+  address       Address[]
+}
+
+model Notify {
+  id        String   @id @default(uuid())
+  message   String
+  read      Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Guest {
+  id        String     @id @default(uuid())
+  user      User?      @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  userId    String?    @unique // Khoá ngoại
+  phone     String?
+  gender    String?
+  address   String?
+  points    Int?
+  role      String
+  carts     Cart?      @relation(name: "GuestCart")
+  orders    Order[]
+  favorites Favorite[]
+  reviews   Review[]
+}
+
+model Address {
+  id      String  @id @default(uuid())
+  phone   String
+  address String
+  name    String
+  user    User?   @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  userId  String? @unique // Khoá ngoại
+  orders  Order[]
+}
+
+model Admin {
+  id           String    @id @default(uuid())
+  managerId    String?
+  user         User?     @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  userId       String?   @unique // Khoá ngoại
+  manager      Admin?    @relation("AdminManager", fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subordinates Admin[]   @relation("AdminManager")
+  vouchers     Voucher[]
+  posts        Post[]
+  dishs        Dish[]
+}
+
+model Action {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  action    String
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  comment   String?
+  value     String
+  guestId   String?
+  guest     Guest?   @relation(fields: [guestId], references: [id])
+  dish      Dish     @relation(fields: [dishId], references: [id])
+  dishId    String
+
+  @@unique([guestId, dishId]) // không cho 1 học sinh đăng ký 2 lần cùng 1 khoá
+}
+
+model Favorite {
+  id      String  @id @default(uuid())
+  guestId String?
+  guest   Guest?  @relation(fields: [guestId], references: [id])
+  dish    Dish    @relation(fields: [dishId], references: [id])
+  dishId  String
+
+  @@unique([guestId, dishId]) // không cho 1 học sinh đăng ký 2 lần cùng 1 khoá
+}
+
+model Cart {
+  id      String        @id @default(uuid())
+  guest   Guest?        @relation(fields: [guestId], references: [id], name: "GuestCart")
+  guestId String?       @unique
+  dishs   CartAndDish[]
+}
+
+model CartAndDish {
+  id     String @id @default(uuid())
+  cart   Cart   @relation(fields: [cartId], references: [id])
+  cartId String
+  dish   Dish   @relation(fields: [dishId], references: [id])
+  dishId String
+  number Int    @default(1)
+
+  @@unique([cartId, dishId]) // không cho 1 học sinh đăng ký 2 lần cùng 1 khoá
+}
+
+model OrderAndDish {
+  id      String @id @default(uuid())
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orderId String
+  dish    Dish   @relation(fields: [dishId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dishId  String
+  number  Int    @default(1)
+
+  @@unique([orderId, dishId]) // không cho 1 học sinh đăng ký 2 lần cùng 1 khoá
+}
+
+model Dish {
+  id           String         @id @default(uuid())
+  name         String
+  createdAt    DateTime       @default(now())
+  cost         Int
+  description  String?
+  ration       Int            @default(1)
+  calo         Int
+  Ingredients  String?
+  carts        CartAndDish[]
+  orders       Order[]
+  OrderAndDish OrderAndDish[]
+  admin        Admin?         @relation(fields: [adminId], references: [id])
+  adminId      String?
+  favorites    Favorite[]
+  reviews      Review[]
+}
+
+model Post {
+  id          String    @id @default(uuid())
+  name        String
+  type        String
+  createdAt   DateTime  @default(now())
+  updateAt    DateTime?
+  description String
+  admin       Admin?    @relation(fields: [adminId], references: [id])
+  adminId     String?
+}
+
+model Voucher {
+  id          String   @id @default(uuid())
+  description String
+  dateStart   DateTime
+  dateEnd     DateTime
+  discount    Int
+  orders      Order[]
+  admin       Admin?   @relation(fields: [adminId], references: [id])
+  adminId     String?
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  status      Boolean
+  createdAt   DateTime @default(now())
+  dateEnd     DateTime
+  discount    Int
+  address     Address  @relation(fields: [addressId], references: [id])
+  addressId   String
+  payment     Int
+  type        String
+  description String?
+  guest       Guest    @relation(fields: [guestId], references: [id])
+  guestId     String
+
+  voucher   Voucher? @relation(fields: [voucherId], references: [id])
+  voucherId String?
+
+  dishs        Dish[]
+  orderAndDish OrderAndDish[]
+}
