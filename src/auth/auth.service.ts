@@ -171,12 +171,12 @@ export class AuthService {
     if (user.isBan === false && banUserDto.isBan === true) {
       await this.actionService.createAction({
         adminId: admin.id, // lấy từ token hoặc request nếu có
-        action: `${admin.name} đã mở Ban cho nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
+        action: `${admin.email} đã mở Ban cho nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
       });
     } else if (user.isBan === false && banUserDto.isBan === true) {
       await this.actionService.createAction({
         adminId: admin.id, // lấy từ token hoặc request nếu có
-        action: `${admin.name} đã Ban  nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
+        action: `${admin.email} đã Ban  nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
       });
     } else {
       throw new ForbiddenException('You do not have permission');

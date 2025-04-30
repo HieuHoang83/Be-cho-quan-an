@@ -150,9 +150,11 @@ model Dish {
 model Post {
   id          String    @id @default(uuid())
   name        String
-  type        String
+  title       String
   createdAt   DateTime  @default(now())
+  createdBy   String
   updateAt    DateTime?
+  updateBy    String?
   description String
   admin       Admin?    @relation(fields: [adminId], references: [id])
   adminId     String?

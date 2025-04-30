@@ -9,6 +9,7 @@ import { UsersModule } from './user/user.module';
 import { NotifyModule } from './notify/notify.module';
 import { SeederModule } from './Seeder/seeder.module';
 import { ActionModule } from './action/action.module';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ActionModule } from './action/action.module';
     NotifyModule,
     SeederModule,
     ActionModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],
