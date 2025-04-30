@@ -49,15 +49,15 @@ export class AuthController {
   @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)
   @ResponseMessage('Ban or unban user')
-  updateAdmin(@Body() banUserDto: BanUserDto) {
-    return this.authService.updateStatusUser(banUserDto);
+  updateAdmin(@User() user: IUser, @Body() banUserDto: BanUserDto) {
+    return this.authService.updateStatusUser(user, banUserDto);
   }
   @Patch('statusAdmin')
   @Roles('Super Admin')
   @UseGuards(RolesGuard)
   @ResponseMessage('Ban or unban Assistant Admin')
-  updateStatusUser(@Body() banUserDto: BanUserDto) {
-    return this.authService.updateAdmin(banUserDto);
+  updateStatusUser(@User() user: IUser, @Body() banUserDto: BanUserDto) {
+    return this.authService.updateAdmin(user, banUserDto);
   }
   @Public()
   @Get('refresh')

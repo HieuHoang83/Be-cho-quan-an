@@ -12,7 +12,7 @@ export class NotifyService {
       data: {
         message: dto.message,
         userId: userId,
-        // read: false // Không cần, đã default trong schema
+        read: false, // Không cần, đã default trong schema
       },
     });
   }

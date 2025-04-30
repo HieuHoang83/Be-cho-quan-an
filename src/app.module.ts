@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './user/user.module';
 import { NotifyModule } from './notify/notify.module';
 import { SeederModule } from './Seeder/seeder.module';
+import { ActionModule } from './action/action.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SeederModule } from './Seeder/seeder.module';
     AuthModule,
     NotifyModule,
     SeederModule,
+    ActionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

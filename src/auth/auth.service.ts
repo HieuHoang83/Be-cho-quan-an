@@ -16,6 +16,8 @@ import { UserService } from 'src/user/user.service';
 import { UpdatePasswordDto } from 'src/user/dto/update-password.dto';
 import { BanUserDto } from 'src/user/dto/ban-user.dto';
 import { PaginateInfo } from 'src/interface/paginate.interface';
+import { NotifyService } from 'src/notify/notify.service';
+import { ActionService } from 'src/action/action.service';
 
 // import { RolesService } from 'src/roles/roles.service';
 
@@ -26,6 +28,8 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private userService: UserService,
+    private notifyService: NotifyService,
+    private actionService: ActionService,
   ) {}
 
   hashpassword = (password: string) => {
@@ -160,16 +164,39 @@ export class AuthService {
     await this.userService.updatePassword(userId, updatePasswordDto);
     return true;
   }
-  async updateStatusUser(banUserDto: BanUserDto) {
+  async updateStatusUser(admin: IUser, banUserDto: BanUserDto) {
     const user = await this.userService.findOneById(banUserDto.userId);
-    if (user.role == 'Guest')
-      return this.userService.updateStatusUser(banUserDto);
-    else {
+
+    if (user.role == 'Guest') this.userService.updateStatusUser(banUserDto);
+    if (user.isBan === false && banUserDto.isBan === true) {
+      await this.actionService.createAction({
+        adminId: admin.id, // lấy từ token hoặc request nếu có
+        action: `${admin.name} đã mở Ban cho nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
+      });
+    } else if (user.isBan === false && banUserDto.isBan === true) {
+      await this.actionService.createAction({
+        adminId: admin.id, // lấy từ token hoặc request nếu có
+        action: `${admin.name} đã Ban  nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
+      });
+    } else {
       throw new ForbiddenException('You do not have permission');
     }
   }
-  async updateAdmin(banUserDto: BanUserDto) {
-    return this.userService.updateStatusUser(banUserDto);
+  async updateAdmin(admin: IUser, banUserDto: BanUserDto) {
+    const user = await this.userService.findOneById(banUserDto.userId);
+
+    await this.userService.updateStatusUser(banUserDto);
+    if (user.isBan === false && banUserDto.isBan === true) {
+      await this.actionService.createAction({
+        adminId: admin.id, // lấy từ token hoặc request nếu có
+        action: `Bạn đã mở Ban cho nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
+      });
+    } else if (user.isBan === false && banUserDto.isBan === true) {
+      await this.actionService.createAction({
+        adminId: admin.id, // lấy từ token hoặc request nếu có
+        action: `Bạn đã Ban nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
+      });
+    }
   }
   async findGuests(paginateInfo: PaginateInfo) {
     return this.userService.findGuests(paginateInfo);
