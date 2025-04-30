@@ -40,7 +40,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       );
     }
     if (user.isBan) {
-      throw new ForbiddenException('You do not have permission');
+      throw new ForbiddenException('You is Ban');
     }
 
     return user;

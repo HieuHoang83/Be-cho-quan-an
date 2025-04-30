@@ -47,7 +47,9 @@ export class SeederService implements OnModuleInit {
     // Tạo Cart cho Guest
     await this.prisma.cart.create({
       data: {
-        guestId: guestUser.guest.id, // Lấy guest.id từ guestUser
+        guest: {
+          connect: { id: guestUser.guest.id }, // Sử dụng connect để liên kết với Guest
+        },
       },
     });
 

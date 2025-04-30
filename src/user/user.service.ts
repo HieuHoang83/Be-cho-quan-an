@@ -30,33 +30,42 @@ export class UserService {
     const exists = await this.prismaService.user.findUnique({
       where: { email: createUserDto.email },
     });
+
     if (exists)
       throw new BadRequestException({ message: 'Email already exists' });
 
     createUserDto.password = this.hashPassword(createUserDto.password);
+
     try {
       // Nếu là Guest
       if (createUserDto.role === 'Guest') {
         let user = await this.prismaService.user.create({
           data: createUserDto,
         });
+
+        // Tạo Guest và liên kết với User
         let guest = await this.prismaService.guest.create({
           data: {
-            userId: user.id,
             gender: null,
-            address: null,
             points: null,
             birthYear: null,
             role: 'Normal',
           },
         });
+
+        // Tạo Cart cho Guest
         await this.prismaService.cart.create({
           data: {
-            guestId: guest.id,
+            guest: {
+              connect: { id: guest.id }, // Sử dụng connect để liên kết với Guest
+            },
           },
         });
+
         return user;
       }
+
+      // Nếu là Assistant Admin
       if (createUserDto.role === 'Assistant Admin') {
         let user = await this.prismaService.user.create({
           data: {
@@ -64,11 +73,14 @@ export class UserService {
             isBan: true, // Gán giá trị isBan là true khi tạo tài khoản
           },
         });
+
+        // Tạo Admin và liên kết với User
         await this.prismaService.admin.create({
           data: {
             userId: user.id,
           },
         });
+
         return user;
       }
     } catch (error) {
