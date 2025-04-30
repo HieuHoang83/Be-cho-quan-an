@@ -9,20 +9,20 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   name          String
-  email         String    @unique
+  email         String   @unique
   password      String
-  createdAt     DateTime  @default(now())
-  isBan         Boolean?  @default(false)
+  createdAt     DateTime @default(now())
+  isBan         Boolean? @default(false)
   role          String
   refreshToken  String?
   avatar        String?
   notifications Notify[]
-  admin         Admin?    @relation
-  Guest         Guest?    @relation
-  address       Address[]
-  phone         String?
+  admin         Admin?   @relation
+  guest         Guest?   @relation
+
+  phone String?
 }
 
 model Notify {
@@ -39,39 +39,43 @@ model Guest {
   user      User?      @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
   userId    String?    @unique // Khoá ngoại
   gender    String?
-  address   String?
+  birthYear Int?
   points    Int?
   role      String     @default("Normal")
   carts     Cart?      @relation(name: "GuestCart")
   orders    Order[]
   favorites Favorite[]
   reviews   Review[]
+  address   Address[]
 }
 
 model Admin {
-  id     String  @id @default(uuid())
-  user   User?   @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
-  userId String? @unique // Khoá ngoại
-
+  id       String    @id @default(uuid())
+  user     User?     @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  userId   String?   @unique // Khoá ngoại
+  actions  Action[]
   vouchers Voucher[]
   posts    Post[]
   dishs    Dish[]
 }
 
 model Address {
-  id      String  @id @default(uuid())
+  id      String @id @default(uuid())
   phone   String
   address String
   name    String
-  user    User?   @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
-  userId  String? @unique // Khoá ngoại
+
   orders  Order[]
+  Guest   Guest?  @relation(fields: [guestId], references: [id])
+  guestId String?
 }
 
 model Action {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   action    String
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  adminId   String
 }
 
 model Review {
@@ -171,12 +175,12 @@ model Order {
   createdAt   DateTime @default(now())
   dateEnd     DateTime
   discount    Int
-  address     Address  @relation(fields: [addressId], references: [id])
+  address     Address  @relation(fields: [addressId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   addressId   String
   payment     Int
   type        String
   description String?
-  guest       Guest    @relation(fields: [guestId], references: [id])
+  guest       Guest    @relation(fields: [guestId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   guestId     String
 
   voucher   Voucher? @relation(fields: [voucherId], references: [id])
