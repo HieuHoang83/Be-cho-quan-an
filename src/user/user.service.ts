@@ -10,6 +10,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { BanUserDto } from './dto/ban-user.dto';
 import { PaginateInfo } from 'src/interface/paginate.interface';
+import { UpdateGuestDto } from './dto/update-guest.dto';
 
 @Injectable()
 export class UserService {
@@ -39,13 +40,19 @@ export class UserService {
         let user = await this.prismaService.user.create({
           data: createUserDto,
         });
-        await this.prismaService.guest.create({
+        let guest = await this.prismaService.guest.create({
           data: {
             userId: user.id,
             gender: null,
             address: null,
             points: null,
+            birthYear: null,
             role: 'Normal',
+          },
+        });
+        await this.prismaService.cart.create({
+          data: {
+            guestId: guest.id,
           },
         });
         return user;
@@ -154,7 +161,7 @@ export class UserService {
     }
   }
   // ✅ Xóa user theo ID
-  async update(userId: string, updateUserDto: UpdateUserDto) {
+  async updateUser(userId: string, updateUserDto: UpdateUserDto) {
     try {
       // Kiểm tra nếu có người dùng với ID này
       const user = await this.prismaService.user.findUnique({
@@ -169,6 +176,26 @@ export class UserService {
       return await this.prismaService.user.update({
         where: { id: userId },
         data: updateUserDto,
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async updateGuest(userId: string, updateGuestDto: UpdateGuestDto) {
+    try {
+      // Kiểm tra nếu có người dùng với ID này
+      const user = await this.prismaService.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException({ message: 'User not found' });
+      }
+
+      // Cập nhật thông tin người dùng
+      return await this.prismaService.user.update({
+        where: { id: userId },
+        data: updateGuestDto,
       });
     } catch (error) {
       throw new BadRequestException(error.message);

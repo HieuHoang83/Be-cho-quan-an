@@ -8,6 +8,7 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { TransformInterceptor } from './core/transform.interceptor';
 import cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { SeederService } from './Seeder/seeder.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -15,6 +16,8 @@ async function bootstrap() {
   // config service for env
   const configService = app.get(ConfigService);
 
+  const seeder = app.get(SeederService);
+  await seeder.onModuleInit();
   // config validation pipe
   app.useGlobalPipes(
     new ValidationPipe({

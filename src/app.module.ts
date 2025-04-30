@@ -7,6 +7,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './user/user.module';
 import { NotifyModule } from './notify/notify.module';
+import { SeederModule } from './Seeder/seeder.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { NotifyModule } from './notify/notify.module';
     UsersModule,
     AuthModule,
     NotifyModule,
+    SeederModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -21,6 +21,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/core/roles.guard';
 import { PaginateInfo } from 'src/interface/paginate.interface';
 import { GetPaginateInfo } from 'src/core/query.guard';
+import { UpdateGuestDto } from './dto/update-guest.dto';
 
 @ApiTags('users')
 @Controller({ path: 'users', version: '1' })
@@ -34,11 +35,17 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Patch()
+  @Patch('/user')
   @ResponseMessage('Update user information')
-  update(@User() user: IUser, @Body() updateUserDto: UpdateUserDto) {
+  updateUser(@User() user: IUser, @Body() updateUserDto: UpdateUserDto) {
     // Lấy id từ đối tượng user đã được lấy từ decorator @User()
-    return this.userService.update(user.id, updateUserDto);
+    return this.userService.updateUser(user.id, updateUserDto);
+  }
+  @Patch('/guest')
+  @ResponseMessage('Update user information')
+  updateGuest(@User() user: IUser, @Body() updateGuestDto: UpdateGuestDto) {
+    // Lấy id từ đối tượng user đã được lấy từ decorator @User()
+    return this.userService.updateGuest(user.id, updateGuestDto);
   }
 
   @Delete(':id')
