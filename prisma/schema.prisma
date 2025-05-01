@@ -105,8 +105,6 @@ model CartAndDish {
   dish   Dish   @relation(fields: [dishId], references: [id])
   dishId String
   number Int    @default(1)
-
-  @@unique([cartId, dishId]) // không cho 1 học sinh đăng ký 2 lần cùng 1 khoá
 }
 
 model OrderAndDish {

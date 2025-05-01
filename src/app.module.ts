@@ -11,6 +11,7 @@ import { SeederModule } from './Seeder/seeder.module';
 import { ActionModule } from './action/action.module';
 import { PostModule } from './post/post.module';
 import { DishModule } from './dish/dish.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { DishModule } from './dish/dish.module';
     ActionModule,
     PostModule,
     DishModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],
