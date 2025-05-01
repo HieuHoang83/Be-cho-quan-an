@@ -21,5 +21,5 @@ export class CreateDishDto {
 
   @IsOptional()
   @IsString()
-  Ingredients?: string;
+  ingredients?: string;
 }

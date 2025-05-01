@@ -21,7 +21,7 @@ export class FavoriteService {
       });
 
       if (exists) {
-        throw new BadRequestException('Món ăn đã có trong danh sách yêu thích');
+        return;
       }
 
       return await this.prisma.favorite.create({

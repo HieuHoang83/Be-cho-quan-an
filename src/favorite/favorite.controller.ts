@@ -18,8 +18,8 @@ import { IUser } from 'src/interface/users.interface';
 export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}
 
-  @Post()
-  @Roles('Guest/:dishId')
+  @Post('/:dishId')
+  @Roles('Guest')
   @UseGuards(RolesGuard)
   @ResponseMessage('Đã thêm vào danh sách yêu thích')
   addFavorite(@Param('dishId') dishId: string, @User() user: IUser) {

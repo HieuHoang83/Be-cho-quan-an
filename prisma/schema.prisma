@@ -21,8 +21,6 @@ model User {
   notifications Notify[]
   admin         Admin?   @relation
   guest         Guest?   @relation
-
-  phone String?
 }
 
 model Notify {
@@ -35,19 +33,20 @@ model Notify {
 }
 
 model Guest {
-  id        String     @id @default(uuid())
-  user      User?      @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
-  userId    String?    @unique // Khoá ngoại
-  gender    String?
-  phone     String?
-  address   String?
-  birthYear Int?
-  points    Int?
-  role      String     @default("Normal")
-  carts     Cart?      @relation(name: "GuestCart")
-  orders    Order[]
-  favorites Favorite[]
-  reviews   Review[]
+  id           String     @id @default(uuid())
+  user         User?      @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
+  userId       String?    @unique // Khoá ngoại
+  gender       String?
+  phone        String?
+  address      String?
+  favoritefood String?
+  birthYear    Int?
+  points       Int?
+  role         String     @default("Normal")
+  carts        Cart?      @relation(name: "GuestCart")
+  orders       Order[]
+  favorites    Favorite[]
+  reviews      Review[]
 }
 
 model Admin {
@@ -124,7 +123,7 @@ model Dish {
   description  String?
   ration       Int            @default(1)
   calo         Int?
-  Ingredients  String?
+  ingredients  String?
   carts        CartAndDish[]
   OrderAndDish OrderAndDish[]
   admin        Admin?         @relation(fields: [updateBy], references: [id])
