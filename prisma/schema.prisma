@@ -158,13 +158,12 @@ model Voucher {
 
 model Order {
   id          String   @id @default(uuid())
-  status      Boolean
   createdAt   DateTime @default(now())
-  dateEnd     DateTime
   discount    Int
   phone       String?
   address     String?
   payment     Int
+  status      String
   type        String
   description String?
   guest       Guest    @relation(fields: [guestId], references: [id], onDelete: NoAction, onUpdate: NoAction)

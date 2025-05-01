@@ -8,5 +8,6 @@ import { PrismaModule } from 'prisma/prisma.module';
 
   controllers: [DishController],
   providers: [DishService],
+  exports: [DishService],
 })
 export class DishModule {}

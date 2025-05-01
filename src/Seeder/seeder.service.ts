@@ -30,7 +30,6 @@ export class SeederService implements OnModuleInit {
         email: 'guest@example.com',
         password,
         role: 'Guest',
-        phone: '0123456789',
 
         guest: {
           create: {

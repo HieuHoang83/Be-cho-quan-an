@@ -71,6 +71,13 @@ export class VoucherService {
       );
     }
   }
+  async findByID(id: string) {
+    const vouchers = await this.prisma.voucher.findMany({ where: { id: id } });
+    if (!vouchers) {
+      throw new NotFoundException('Không tìm thấy voucher');
+    }
+    return vouchers;
+  }
   async getValidVouchers() {
     try {
       const currentDate = new Date(); // Lấy ngày hiện tại
