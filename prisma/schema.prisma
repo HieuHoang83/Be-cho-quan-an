@@ -39,6 +39,8 @@ model Guest {
   user      User?      @relation(fields: [userId], references: [id], onUpdate: NoAction, onDelete: NoAction)
   userId    String?    @unique // Khoá ngoại
   gender    String?
+  phone     String?
+  address   String?
   birthYear Int?
   points    Int?
   role      String     @default("Normal")
@@ -46,7 +48,6 @@ model Guest {
   orders    Order[]
   favorites Favorite[]
   reviews   Review[]
-  address   Address[]
 }
 
 model Admin {
@@ -57,17 +58,6 @@ model Admin {
   vouchers Voucher[]
   posts    Post[]
   dishs    Dish[]
-}
-
-model Address {
-  id      String @id @default(uuid())
-  phone   String
-  address String
-  name    String
-
-  orders  Order[]
-  Guest   Guest?  @relation(fields: [guestId], references: [id])
-  guestId String?
 }
 
 model Action {
@@ -137,12 +127,12 @@ model Dish {
   cost         Int
   description  String?
   ration       Int            @default(1)
-  calo         Int
+  calo         Int?
   Ingredients  String?
   carts        CartAndDish[]
   OrderAndDish OrderAndDish[]
-  admin        Admin?         @relation(fields: [adminId], references: [id])
-  adminId      String?
+  admin        Admin?         @relation(fields: [updateBy], references: [id])
+  updateBy     String?
   favorites    Favorite[]
   reviews      Review[]
 }
@@ -177,8 +167,8 @@ model Order {
   createdAt   DateTime @default(now())
   dateEnd     DateTime
   discount    Int
-  address     Address  @relation(fields: [addressId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  addressId   String
+  phone       String?
+  address     String?
   payment     Int
   type        String
   description String?

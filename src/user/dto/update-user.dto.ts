@@ -6,10 +6,6 @@ export class UpdateUserDto {
   name?: string;
 
   @IsOptional()
-  @IsString({ message: 'Phone must be a string' })
-  phone?: string;
-
-  @IsOptional()
   @IsString({ message: 'Avatar must be a link' })
   avatar?: string;
 }

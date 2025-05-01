@@ -22,8 +22,4 @@ export class CreateUserDto {
     message: 'Role must be either "Guest" or "Assistant Admin"',
   })
   role: string;
-
-  @IsOptional()
-  @IsString({ message: 'Phone must be a string' })
-  phone?: string;
 }

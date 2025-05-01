@@ -24,7 +24,20 @@ export class UserService {
   private checkPassword(password: string, hash: string): boolean {
     return compareSync(password, hash);
   }
+  async findAdminByUserId(userId: string) {
+    const admin = await this.prismaService.admin.findUnique({
+      where: { userId: userId },
+    });
 
+    return admin;
+  }
+  async findGuestByUserId(userId: string) {
+    const guest = await this.prismaService.guest.findUnique({
+      where: { userId: userId },
+    });
+
+    return guest;
+  }
   // ✅ Thêm user mới vào database
   async create(createUserDto: CreateUserDto) {
     const exists = await this.prismaService.user.findUnique({

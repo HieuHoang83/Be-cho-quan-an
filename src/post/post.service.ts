@@ -14,13 +14,20 @@ export class PostService {
   ) {}
 
   async createPost(user: IUser, dto: CreatePostDto) {
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!admin) {
+      throw new BadRequestException('Người dùng không phải là Admin');
+    }
     try {
       let post = await this.prisma.post.create({
         data: {
           name: dto.name,
           title: dto.title,
           description: dto.description,
-          adminId: user.id,
+          adminId: admin.id,
           createdBy: user.email,
         },
       });
@@ -35,6 +42,13 @@ export class PostService {
   }
 
   async updatePost(user: IUser, postId: string, dto: UpdatePostDto) {
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!admin) {
+      throw new BadRequestException('Người dùng không phải là Admin');
+    }
     try {
       let post = await this.prisma.post.update({
         where: { id: postId },
@@ -45,7 +59,7 @@ export class PostService {
         },
       });
       await this.actionService.createAction({
-        adminId: user.id, // lấy từ token hoặc request nếu có
+        adminId: admin.id, // lấy từ token hoặc request nếu có
         action: `${user.email} đã cập nhật lại bài viết có tiêu đề ${dto.title}`, // hoặc ID, tuỳ theo cách bạn muốn log
       });
       return post;
@@ -71,12 +85,19 @@ export class PostService {
   }
 
   async deletePost(id: string, user: IUser) {
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!admin) {
+      throw new BadRequestException('Người dùng không phải là Admin');
+    }
     let post = await this.getPost(id);
     await this.prisma.post.delete({
       where: { id },
     });
-    await this.actionService.createAction({
-      adminId: user.id, // lấy từ token hoặc request nếu có
+    return this.actionService.createAction({
+      adminId: admin.id, // lấy từ token hoặc request nếu có
       action: `${user.email} đã cập nhật lại bài viết có tiêu đề ${post.title}`, // hoặc ID, tuỳ theo cách bạn muốn log
     });
   }

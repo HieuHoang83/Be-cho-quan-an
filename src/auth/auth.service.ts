@@ -61,20 +61,23 @@ export class AuthService {
     password;
     let user: any;
     user = await this.userService.login(email, password);
-    let refresh_token = this.createRefreshToken({
-      id: user?.id,
-      email: user?.email,
-      name: user?.name,
-      role: user?.role,
-      isBan: user?.isBan,
-    });
-    let access_token = this.createAccessToken({
-      id: user?.id,
-      email: user?.email,
-      name: user?.name,
-      role: user?.role,
-      isBan: user?.isBan,
-    });
+    const admin = await this.userService.findAdminByUserId(user.id);
+    const guest = await this.userService.findGuestByUserId(user.id);
+
+    // Tạo payload cho token
+    const payload = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      isBan: user.isBan,
+      adminId: admin?.id ?? null,
+      guestId: guest?.id ?? null,
+    };
+
+    // Tạo tokens
+    const refresh_token = this.createRefreshToken(payload);
+    const access_token = this.createAccessToken(payload);
     return {
       user: {
         email: user?.email,
@@ -164,26 +167,25 @@ export class AuthService {
     await this.userService.updatePassword(userId, updatePasswordDto);
     return true;
   }
-  async updateStatusUser(admin: IUser, banUserDto: BanUserDto) {
-    const user = await this.userService.findOneById(banUserDto.userId);
-
+  async updateStatusUser(user: IUser, banUserDto: BanUserDto) {
+    const admin = await this.userService.findAdminByUserId(user.id);
     if (user.role == 'Guest') this.userService.updateStatusUser(banUserDto);
     if (user.isBan === false && banUserDto.isBan === true) {
       await this.actionService.createAction({
         adminId: admin.id, // lấy từ token hoặc request nếu có
-        action: `${admin.email} đã mở Ban cho nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
+        action: `${user.email} đã mở Ban cho nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
       });
     } else if (user.isBan === false && banUserDto.isBan === true) {
       await this.actionService.createAction({
         adminId: admin.id, // lấy từ token hoặc request nếu có
-        action: `${admin.email} đã Ban  nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
+        action: `${user.email} đã Ban  nameUser: ${user.name} với emailUser: ${user.email}`, // hoặc ID, tuỳ theo cách bạn muốn log
       });
     } else {
       throw new ForbiddenException('You do not have permission');
     }
   }
-  async updateAdmin(admin: IUser, banUserDto: BanUserDto) {
-    const user = await this.userService.findOneById(banUserDto.userId);
+  async updateAdmin(user: IUser, banUserDto: BanUserDto) {
+    const admin = await this.userService.findAdminByUserId(user.id);
 
     await this.userService.updateStatusUser(banUserDto);
     if (user.isBan === false && banUserDto.isBan === true) {

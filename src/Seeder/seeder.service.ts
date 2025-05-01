@@ -31,6 +31,7 @@ export class SeederService implements OnModuleInit {
         password,
         role: 'Guest',
         phone: '0123456789',
+
         guest: {
           create: {
             gender: 'Male',
@@ -62,7 +63,7 @@ export class SeederService implements OnModuleInit {
         email: 'assistantAdmin@example.com',
         password,
         role: 'Assistant Admin',
-        isBan: true,
+        isBan: false,
         admin: {
           create: {},
         },

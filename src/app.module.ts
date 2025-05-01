@@ -10,6 +10,7 @@ import { NotifyModule } from './notify/notify.module';
 import { SeederModule } from './Seeder/seeder.module';
 import { ActionModule } from './action/action.module';
 import { PostModule } from './post/post.module';
+import { DishModule } from './dish/dish.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PostModule } from './post/post.module';
     SeederModule,
     ActionModule,
     PostModule,
+    DishModule,
   ],
   controllers: [AppController],
   providers: [AppService],

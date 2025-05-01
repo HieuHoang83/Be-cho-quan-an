@@ -12,4 +12,12 @@ export class UpdateGuestDto {
     message: 'Birth year must not be in the future',
   })
   birthYear?: number;
+
+  @IsOptional()
+  @IsString({ message: 'Address must be a string' })
+  address?: string;
+
+  @IsOptional()
+  @IsString({ message: 'phone must be a string' })
+  phone?: string;
 }
