@@ -13,6 +13,8 @@ import { PostModule } from './post/post.module';
 import { DishModule } from './dish/dish.module';
 import { CartModule } from './cart/cart.module';
 import { ReviewModule } from './review/review.module';
+import { FavoriteModule } from './favorite/favorite.module';
+import { VoucherModule } from './voucher/voucher.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { ReviewModule } from './review/review.module';
     DishModule,
     CartModule,
     ReviewModule,
+    FavoriteModule,
+    VoucherModule,
   ],
   controllers: [AppController],
   providers: [AppService],
