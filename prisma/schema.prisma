@@ -77,8 +77,6 @@ model Review {
   guest     Guest?   @relation(fields: [guestId], references: [id])
   dish      Dish     @relation(fields: [dishId], references: [id])
   dishId    String
-
-  @@unique([guestId, dishId]) // không cho 1 học sinh đăng ký 2 lần cùng 1 khoá
 }
 
 model Favorite {

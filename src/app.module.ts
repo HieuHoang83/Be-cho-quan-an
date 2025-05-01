@@ -12,6 +12,7 @@ import { ActionModule } from './action/action.module';
 import { PostModule } from './post/post.module';
 import { DishModule } from './dish/dish.module';
 import { CartModule } from './cart/cart.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CartModule } from './cart/cart.module';
     PostModule,
     DishModule,
     CartModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
