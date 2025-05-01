@@ -21,8 +21,6 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  @Roles('Normal', 'Super Admin', 'Assistant Admin')
-  @UseGuards(RolesGuard)
   @ResponseMessage('Tạo đơn hàng')
   create(@User() user: IUser, @Body() dto: CreateOrderDto) {
     return this.orderService.createOrder(user, dto);
@@ -37,32 +35,24 @@ export class OrderController {
   }
 
   @Get(':id')
-  @Roles('Super Admin', 'Assistant Admin', 'Normal')
-  @UseGuards(RolesGuard)
   @ResponseMessage('Lấy chi tiết đơn hàng')
   findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
   }
 
   @Patch(':id')
-  @Roles('Super Admin', 'Assistant Admin')
-  @UseGuards(RolesGuard)
   @ResponseMessage('Cập nhật đơn hàng')
   update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
     return this.orderService.update(id, dto);
   }
 
   @Delete(':id')
-  @Roles('Super Admin', 'Assistant Admin')
-  @UseGuards(RolesGuard)
   @ResponseMessage('Xoá đơn hàng')
   remove(@Param('id') id: string) {
     return this.orderService.remove(id);
   }
 
   @Get('guest/:guestId')
-  @Roles('Normal')
-  @UseGuards(RolesGuard)
   @ResponseMessage('Đơn hàng theo người dùng')
   findByGuest(@Param('guestId') guestId: string) {
     return this.orderService.findByGuestId(guestId);
