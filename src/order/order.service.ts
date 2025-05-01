@@ -121,30 +121,33 @@ export class OrderService {
           throw new BadRequestException('Voucher không hợp lệ');
         }
       }
+      let finalPayment = orderOld.payment;
+      let discountPercent = orderOld.discount;
+      if (dto.orderAndDish) {
+        const dishIds = dto.orderAndDish.map((item) => item.dishId);
+        const dishes = await this.prisma.dish.findMany({
+          where: { id: { in: dishIds } },
+          select: { id: true, cost: true },
+        });
 
-      // 👉 Tính tổng tiền trước khi áp dụng giảm giá
-      const dishIds = dto.orderAndDish.map((item) => item.dishId);
-      const dishes = await this.prisma.dish.findMany({
-        where: { id: { in: dishIds } },
-        select: { id: true, cost: true },
-      });
+        const dishCostMap = new Map(dishes.map((d) => [d.id, d.cost]));
 
-      const dishCostMap = new Map(dishes.map((d) => [d.id, d.cost]));
-
-      let total = 0;
-      for (const item of dto.orderAndDish) {
-        const cost = dishCostMap.get(item.dishId);
-        if (cost === undefined) {
-          throw new BadRequestException(
-            `Không tìm thấy món ăn với id: ${item.dishId}`,
-          );
+        let total = 0;
+        for (const item of dto.orderAndDish) {
+          const cost = dishCostMap.get(item.dishId);
+          if (cost === undefined) {
+            throw new BadRequestException(
+              `Không tìm thấy món ăn với id: ${item.dishId}`,
+            );
+          }
+          total += cost * item.number;
         }
-        total += cost * item.number;
-      }
 
-      // 👉 Áp dụng giảm giá (nếu có voucher)
-      const discountPercent = voucher?.discount || orderOld.discount || 0;
-      const finalPayment = Math.floor((total * (100 - discountPercent)) / 100);
+        // 👉 Áp dụng giảm giá (nếu có voucher)
+        discountPercent = voucher?.discount || orderOld.discount || 0;
+        finalPayment = Math.floor((total * (100 - discountPercent)) / 100);
+      }
+      // 👉 Tính tổng tiền trước khi áp dụng giảm giá
 
       // Cập nhật đơn hàng với thông tin mới
       const order = await this.prisma.order.update({
