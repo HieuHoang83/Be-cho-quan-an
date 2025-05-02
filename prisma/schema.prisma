@@ -118,8 +118,12 @@ model OrderAndDish {
 model Dish {
   id           String         @id @default(uuid())
   name         String
+  url          String?
+  type         String
   createdAt    DateTime       @default(now())
-  cost         Int
+  priceOld     Int
+  priceNew     Int?
+  FoodChart    String?
   description  String?
   ration       Int            @default(1)
   calo         Int?

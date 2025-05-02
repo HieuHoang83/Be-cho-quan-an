@@ -96,7 +96,7 @@ export class ReviewService {
   }
 
   // Lấy tất cả đánh giá của một món ăn
-  async getReviewsByDish(dishId: string) {
+  async getReviewsByDish(dishId: string, user: IUser) {
     try {
       const reviews = await this.prisma.review.findMany({
         where: { dishId },
@@ -106,7 +106,7 @@ export class ReviewService {
             select: {
               user: {
                 // Lấy thông tin user liên kết với guest
-                select: { name: true }, // Lấy tên của user
+                select: { name: true, id: true }, // Lấy tên của user
               },
             },
           },
@@ -120,7 +120,8 @@ export class ReviewService {
           comment: review.comment,
           value: review.value,
           createdAt: review.createdAt,
-          guestname: review.guest?.user.name, // Truy cập tên người dùng từ guest
+          guestname: review.guest?.user.name,
+          isMyEvalte: review.guest?.user.id == user.guestId, // Truy cập tên người dùng từ guest
           dishId: review.dishId,
           dish: review.dish,
         };

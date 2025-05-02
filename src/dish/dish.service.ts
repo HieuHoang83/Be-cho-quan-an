@@ -23,7 +23,7 @@ export class DishService {
     if (!admin) {
       throw new BadRequestException('Người dùng không phải là Admin');
     }
-
+    createDishDto.priceNew = createDishDto.priceNew ?? createDishDto.priceOld;
     try {
       return await this.prisma.dish.create({
         data: {

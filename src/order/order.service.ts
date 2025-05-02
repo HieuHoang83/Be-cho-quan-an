@@ -33,10 +33,10 @@ export class OrderService {
       const dishIds = dto.orderAndDish.map((item) => item.dishId);
       const dishes = await this.prisma.dish.findMany({
         where: { id: { in: dishIds } },
-        select: { id: true, cost: true },
+        select: { id: true, priceNew: true },
       });
 
-      const dishCostMap = new Map(dishes.map((d) => [d.id, d.cost]));
+      const dishCostMap = new Map(dishes.map((d) => [d.id, d.priceNew]));
 
       let total = 0;
       for (const item of dto.orderAndDish) {
@@ -127,10 +127,10 @@ export class OrderService {
         const dishIds = dto.orderAndDish.map((item) => item.dishId);
         const dishes = await this.prisma.dish.findMany({
           where: { id: { in: dishIds } },
-          select: { id: true, cost: true },
+          select: { id: true, priceNew: true, priceOld: true },
         });
 
-        const dishCostMap = new Map(dishes.map((d) => [d.id, d.cost]));
+        const dishCostMap = new Map(dishes.map((d) => [d.id, d.priceNew]));
 
         let total = 0;
         for (const item of dto.orderAndDish) {

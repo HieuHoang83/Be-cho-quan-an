@@ -50,8 +50,8 @@ export class ReviewController {
 
   @Get('by-dish/:dishId')
   @ResponseMessage('Get reviews by dish')
-  getReviewsByDish(@Param('dishId') dishId: string) {
-    return this.reviewService.getReviewsByDish(dishId);
+  getReviewsByDish(@Param('dishId') dishId: string, @User() user: IUser) {
+    return this.reviewService.getReviewsByDish(dishId, user);
   }
   @Get('reviews')
   @ResponseMessage('Get all reviews')
