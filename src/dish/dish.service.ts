@@ -47,13 +47,51 @@ export class DishService {
       take: paginateInfo.limit,
     });
   }
+  async findAllWithFavoriteFlag(paginateInfo: PaginateInfo, user: IUser) {
+    const [dishes, favorites] = await Promise.all([
+      this.prisma.dish.findMany({
+        skip: paginateInfo.offset,
+        take: paginateInfo.limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.favorite.findMany({
+        select: { dishId: true },
+      }),
+    ]);
 
+    const favoriteIds = new Set(favorites.map((f) => f.dishId));
+
+    return dishes.map((dish) => ({
+      ...dish,
+      isFavorite: favoriteIds.has(dish.id),
+    }));
+  }
   async findOne(id: string) {
-    const dish = await this.prisma.dish.findUnique({ where: { id } });
+    const dish = await this.prisma.dish.findUnique({
+      where: { id },
+      include: {
+        reviews: true,
+      },
+    });
+
     if (!dish) {
       throw new NotFoundException('Không tìm thấy món ăn');
     }
-    return dish;
+
+    const totalReviews = dish.reviews.length;
+
+    // Giả sử value là số dạng chuỗi, cần convert
+    const avgRating =
+      totalReviews > 0
+        ? dish.reviews.reduce((sum, review) => sum + Number(review.value), 0) /
+          totalReviews
+        : 0;
+
+    return {
+      ...dish,
+      totalReviews,
+      avgRating: Number(avgRating.toFixed(1)),
+    };
   }
 
   async update(user: IUser, id: string, updateDishDto: UpdateDishDto) {
@@ -83,9 +121,10 @@ export class DishService {
 
   async remove(id: string) {
     try {
-      return await this.prisma.dish.delete({
+      await this.prisma.dish.delete({
         where: { id },
       });
+      return { message: 'Xóa món ăn thành công' };
     } catch (error) {
       throw new NotFoundException('Không thể xóa món ăn: ' + error.message);
     }

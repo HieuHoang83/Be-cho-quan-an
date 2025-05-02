@@ -14,7 +14,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/core/roles.guard';
-import { User } from 'src/decorators/customize';
+import { Public, User } from 'src/decorators/customize';
 import { IUser } from 'src/interface/users.interface';
 
 @Controller('posts')
@@ -28,6 +28,7 @@ export class PostController {
     return this.postService.createPost(user, dto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.postService.getAllPosts();

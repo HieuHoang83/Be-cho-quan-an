@@ -164,7 +164,7 @@ export class UserService {
       }
 
       if (!this.checkPassword(password, user.password)) {
-        throw new BadRequestException('Wrong password');
+        throw new BadRequestException('username or password is incorrect');
       }
 
       return user; // Trả về user (hoặc tạo JWT tại đây)
@@ -208,23 +208,59 @@ export class UserService {
   }
   async updateGuest(userId: string, updateGuestDto: UpdateGuestDto) {
     try {
-      // Kiểm tra nếu có người dùng với ID này
       const user = await this.prismaService.user.findUnique({
         where: { id: userId },
+        include: { guest: true },
       });
 
       if (!user) {
         throw new NotFoundException({ message: 'User not found' });
       }
 
-      // Cập nhật thông tin người dùng
-      return await this.prismaService.user.update({
-        where: { id: userId },
+      if (!user.guest) {
+        throw new NotFoundException({ message: 'Guest profile not found' });
+      }
+
+      // Cập nhật bảng Guest thông qua guestId
+      return await this.prismaService.guest.update({
+        where: { id: user.guest.id },
         data: updateGuestDto,
       });
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+  async getInfoByToken(userId: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: {
+        // Chọn chỉ các trường cần thiết
+
+        name: true,
+        email: true,
+        isBan: true,
+        avatar: true,
+        role: true,
+        guest: {
+          // Lấy thông tin từ bảng guest
+          select: {
+            gender: true,
+            birthYear: true,
+            address: true,
+            phone: true,
+            favoritefood: true,
+            points: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
   async updatePassword(userId: string, updatePasswordDto: UpdatePasswordDto) {
     try {
@@ -238,10 +274,10 @@ export class UserService {
       }
 
       // Kiểm tra mật khẩu cũ
-      if (user.password !== this.hashPassword(updatePasswordDto.oldPassword)) {
-        throw new BadRequestException({ message: 'Old password is incorrect' });
-      }
 
+      if (!this.checkPassword(updatePasswordDto.oldPassword, user.password)) {
+        throw new BadRequestException('Old password is incorrect');
+      }
       // Cập nhật mật khẩu mới
       const hashedPassword = this.hashPassword(updatePasswordDto.newPassword);
       return await this.prismaService.user.update({

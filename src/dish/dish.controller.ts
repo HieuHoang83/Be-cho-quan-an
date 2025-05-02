@@ -13,7 +13,7 @@ import { DishService } from './dish.service';
 import { CreateDishDto } from './dto/create-dish.dto';
 import { UpdateDishDto } from './dto/update-dish.dto';
 import { IUser } from 'src/interface/users.interface';
-import { ResponseMessage, User } from 'src/decorators/customize';
+import { Public, ResponseMessage, User } from 'src/decorators/customize';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/core/roles.guard';
 import { use } from 'passport';
@@ -32,12 +32,23 @@ export class DishController {
     return this.dishService.create(user, createDishDto);
   }
 
-  @ResponseMessage('Get all dishes')
-  @Get()
+  @Public()
+  @ResponseMessage('Get all dishes no favorite')
+  @Get('')
   findAll(@GetPaginateInfo() paginateInfo: PaginateInfo) {
     return this.dishService.findAll(paginateInfo);
   }
-
+  @Roles('Guest')
+  @UseGuards(RolesGuard)
+  @ResponseMessage('Get all dishes with favorite flag')
+  @Get('guest')
+  findAllGuest(
+    @GetPaginateInfo() paginateInfo: PaginateInfo,
+    @User() user: IUser,
+  ) {
+    return this.dishService.findAllWithFavoriteFlag(paginateInfo, user);
+  }
+  @Public()
   @ResponseMessage('Get dish by ID')
   @Get(':id')
   findOne(@Param('id') id: string) {

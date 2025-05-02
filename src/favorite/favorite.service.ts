@@ -36,14 +36,34 @@ export class FavoriteService {
   }
 
   async getFavorites(user: IUser) {
-    return await this.prisma.favorite.findMany({
+    const favorites = await this.prisma.favorite.findMany({
       where: { guestId: user.guestId },
       include: {
         dish: true,
       },
     });
-  }
 
+    // Trả về danh sách chỉ gồm thông tin món ăn
+    return favorites.map((f) => f.dish);
+  }
+  async checkFavorite(user: IUser, dishId: string) {
+    const guest = await this.prisma.guest.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!guest) throw new BadRequestException('Không phải khách');
+
+    const exists = await this.prisma.favorite.findUnique({
+      where: {
+        guestId_dishId: {
+          guestId: guest.id,
+          dishId,
+        },
+      },
+    });
+
+    return { isFavorite: !!exists };
+  }
   async removeFavorite(user: IUser, dishId: string) {
     const favorite = await this.prisma.favorite.findUnique({
       where: {

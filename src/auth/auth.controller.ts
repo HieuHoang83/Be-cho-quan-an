@@ -14,7 +14,6 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { IUser } from 'src/interface/users.interface';
 import { Request, Response } from 'express';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { RegisterDto } from './dto/register-user.dto';
 import { UserLoginDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from 'src/user/dto/update-password.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -59,15 +58,15 @@ export class AuthController {
   updateStatusUser(@User() user: IUser, @Body() banUserDto: BanUserDto) {
     return this.authService.updateAdmin(user, banUserDto);
   }
-  @Public()
-  @Get('refresh')
-  @ResponseMessage('Get profile by refresh token')
-  hanldeRefreshToken(
-    @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    return this.authService.processNewToken(request, response);
-  }
+  // @Public()
+  // @Get('refresh')
+  // @ResponseMessage('Get profile by refresh token')
+  // hanldeRefreshToken(
+  //   @Req() request: Request,
+  //   @Res({ passthrough: true }) response: Response,
+  // ) {
+  //   return this.authService.processNewToken(request, response);
+  // }
 
   @Get('logout')
   @ResponseMessage('Log out success')

@@ -28,7 +28,7 @@ export class ReviewService {
           },
         },
         include: {
-          dish: true,
+          dish: false,
         },
       });
 
@@ -38,8 +38,6 @@ export class ReviewService {
         value: review.value,
         createdAt: review.createdAt,
         guestname: user.name,
-        dishId: review.dishId,
-        dish: review.dish,
       };
     } catch (error) {
       throw new BadRequestException(
@@ -67,7 +65,7 @@ export class ReviewService {
         comment: dto.comment,
       },
       include: {
-        dish: true,
+        dish: false,
       },
     });
 
@@ -77,8 +75,6 @@ export class ReviewService {
       value: updatedReview.value,
       createdAt: updatedReview.createdAt,
       guestname: user.name,
-      dishId: updatedReview.dishId,
-      dish: updatedReview.dish,
     };
   }
 
@@ -122,8 +118,6 @@ export class ReviewService {
           createdAt: review.createdAt,
           guestname: review.guest?.user.name,
           isMyEvalte: review.guest?.user.id == user.guestId, // Truy cập tên người dùng từ guest
-          dishId: review.dishId,
-          dish: review.dish,
         };
       });
     } catch (error) {

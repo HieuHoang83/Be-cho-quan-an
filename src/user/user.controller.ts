@@ -34,9 +34,15 @@ export class UserController {
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
-
-  @Patch('/user')
-  @ResponseMessage('Update user information')
+  @Get('/info')
+  @Roles('Guest')
+  @UseGuards(RolesGuard)
+  @ResponseMessage('create new User')
+  getInfoBytoken(@User() user: IUser) {
+    return this.userService.getInfoByToken(user.id);
+  }
+  @Patch('/avatar')
+  @ResponseMessage('Update user avatar')
   updateUser(@User() user: IUser, @Body() updateUserDto: UpdateUserDto) {
     // Lấy id từ đối tượng user đã được lấy từ decorator @User()
     return this.userService.updateUser(user.id, updateUserDto);

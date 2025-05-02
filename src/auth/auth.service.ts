@@ -6,7 +6,6 @@ import {
 
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from 'src/interface/users.interface';
-import { RegisterDto } from './dto/register-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import ms from 'ms';
