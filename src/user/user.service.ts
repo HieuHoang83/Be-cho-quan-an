@@ -52,13 +52,15 @@ export class UserService {
     try {
       // Nếu là Guest
       if (createUserDto.role === 'Guest') {
+        // B1: Tạo User
         let user = await this.prismaService.user.create({
           data: createUserDto,
         });
 
-        // Tạo Guest và liên kết với User
+        // B2: Tạo Guest và gắn với userId
         let guest = await this.prismaService.guest.create({
           data: {
+            userId: user.id, // GẮN trực tiếp userId
             gender: null,
             points: null,
             birthYear: null,
@@ -66,11 +68,11 @@ export class UserService {
           },
         });
 
-        // Tạo Cart cho Guest
+        // B3: Tạo Cart và gắn với Guest
         await this.prismaService.cart.create({
           data: {
             guest: {
-              connect: { id: guest.id }, // Sử dụng connect để liên kết với Guest
+              connect: { id: guest.id },
             },
           },
         });
