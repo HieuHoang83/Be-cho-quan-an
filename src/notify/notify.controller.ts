@@ -18,8 +18,8 @@ export class NotifyController {
   constructor(private readonly notifyService: NotifyService) {}
 
   @Post()
-  create(@Body() createNotifyDto: CreateNotifyDto) {
-    return this.notifyService.create(createNotifyDto.userId, createNotifyDto);
+  create(@User() user: IUser, @Body() createNotifyDto: CreateNotifyDto) {
+    return this.notifyService.create(user.id, createNotifyDto.message);
   }
 
   @Get()

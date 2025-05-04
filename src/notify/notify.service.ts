@@ -7,10 +7,10 @@ import { IUser } from 'src/interface/users.interface';
 @Injectable()
 export class NotifyService {
   constructor(private prisma: PrismaService) {}
-  async create(userId: string, dto: CreateNotifyDto) {
+  async create(userId: string, message: string) {
     return this.prisma.notify.create({
       data: {
-        message: dto.message,
+        message: message,
         userId: userId,
         read: false, // Không cần, đã default trong schema
       },

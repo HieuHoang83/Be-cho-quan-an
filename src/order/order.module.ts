@@ -6,9 +6,16 @@ import { PrismaService } from 'prisma/prisma.service';
 import { DishService } from 'src/dish/dish.service';
 import { VoucherModule } from 'src/voucher/voucher.module';
 import { VoucherService } from 'src/voucher/voucher.service';
+import { NotifyService } from 'src/notify/notify.service';
 
 @Module({
   controllers: [OrderController],
-  providers: [OrderService, PrismaService, DishService, VoucherService],
+  providers: [
+    OrderService,
+    PrismaService,
+    DishService,
+    VoucherService,
+    NotifyService,
+  ],
 })
 export class OrderModule {}

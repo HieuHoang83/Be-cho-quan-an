@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class CreateNotifyDto {
+export class UpdateStatusDto {
   @IsString()
-  message: string;
+  status: string;
 }

@@ -51,7 +51,7 @@ export class CartController {
   @Roles('Guest')
   @UseGuards(RolesGuard)
   @ResponseMessage('Get all dishes in cart')
-  findAll() {
-    return this.cartService.findAll();
+  findAll(@User() user: IUser) {
+    return this.cartService.findByUser(user);
   }
 }

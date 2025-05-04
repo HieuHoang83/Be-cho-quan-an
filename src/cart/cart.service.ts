@@ -50,6 +50,14 @@ export class CartService {
 
   // Cập nhật số lượng món ăn
   async updateDishQuantity(cartDishId: string, dto: UpdateDishQuantityDto) {
+    let cartDish = await this.prisma.cartAndDish.findUnique({
+      where: {
+        id: cartDishId,
+      },
+    });
+    if (!cartDish) {
+      throw new NotFoundException('lỗi Id ');
+    }
     return this.prisma.cartAndDish.update({
       where: {
         id: cartDishId,
@@ -70,8 +78,13 @@ export class CartService {
   }
 
   // Lấy tất cả món trong giỏ
-  async findAll() {
+  async findByUser(user: IUser) {
     return this.prisma.cartAndDish.findMany({
+      where: {
+        cart: {
+          guestId: user.guestId,
+        },
+      },
       include: {
         dish: true,
       },

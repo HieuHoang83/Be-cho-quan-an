@@ -72,7 +72,7 @@ export class VoucherService {
     }
   }
   async findByID(id: string) {
-    const vouchers = await this.prisma.voucher.findMany({ where: { id: id } });
+    const vouchers = await this.prisma.voucher.findFirst({ where: { id: id } });
     if (!vouchers) {
       throw new NotFoundException('Không tìm thấy voucher');
     }
