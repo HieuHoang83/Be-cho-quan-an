@@ -8,5 +8,14 @@ export class CreatePostDto {
   title: string;
 
   @IsString()
+  @IsOptional()
   description: string;
+
+  @IsString()
+  @IsOptional()
+  ingredients: string;
+
+  @IsString()
+  @IsOptional()
+  label: string;
 }

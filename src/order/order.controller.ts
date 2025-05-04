@@ -16,6 +16,7 @@ import { RolesGuard } from 'src/core/roles.guard';
 import { ResponseMessage, User } from 'src/decorators/customize';
 import { IUser } from 'src/interface/users.interface';
 import { UpdateStatusDto } from './dto/update-status.dto';
+import { GetTotalPriceDto } from './dto/getTotalPrice.dto';
 
 @Controller('order')
 export class OrderController {
@@ -26,7 +27,11 @@ export class OrderController {
   create(@User() user: IUser, @Body() dto: CreateOrderDto) {
     return this.orderService.createOrder(user, dto);
   }
-
+  @Post('checktotalPrice')
+  @ResponseMessage('Tính tiền đơn hàng')
+  getTotalPrice(@Body() dto: GetTotalPriceDto) {
+    return this.orderService.getTotalPrice(dto);
+  }
   @Get()
   @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)

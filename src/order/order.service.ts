@@ -10,6 +10,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { VoucherService } from 'src/voucher/voucher.service';
 import { DishService } from 'src/dish/dish.service';
 import { NotifyService } from 'src/notify/notify.service';
+import { GetTotalPriceDto } from './dto/getTotalPrice.dto';
 
 @Injectable()
 export class OrderService {
@@ -84,6 +85,49 @@ export class OrderService {
         `Đơn hàng của bạn đang chờ xử lý với mã đơn hàng: ${order.id}`,
       );
       return order;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async getTotalPrice(dto: GetTotalPriceDto) {
+    try {
+      let voucher = null;
+      if (dto.voucherId) {
+        voucher = await this.voucherService.findByID(dto.voucherId);
+        const now = new Date();
+        if (!voucher || voucher.dateStart > now || voucher.dateEnd < now) {
+          throw new BadRequestException('Voucher không hợp lệ');
+        }
+      }
+      // 👉 Tính tổng tiền trước khi áp dụng giảm giá
+      const dishIds = dto.orderAndDish.map((item) => item.dishId);
+      const dishes = await this.prisma.dish.findMany({
+        where: { id: { in: dishIds } },
+        select: { id: true, priceNew: true },
+      });
+
+      const dishCostMap = new Map(dishes.map((d) => [d.id, d.priceNew]));
+
+      let total = 0;
+      for (const item of dto.orderAndDish) {
+        const cost = dishCostMap.get(item.dishId);
+        if (cost === undefined) {
+          throw new BadRequestException(
+            `Không tìm thấy món ăn với id: ${item.dishId}`,
+          );
+        }
+        total += cost * item.number;
+      }
+
+      // 👉 Áp dụng giảm giá
+      if (!voucher) {
+        throw new BadRequestException('Voucher không tồn tại');
+      }
+
+      const discountPercent = voucher.discount;
+      const finalPayment = Math.floor((total * (100 - discountPercent)) / 100);
+
+      return finalPayment;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
