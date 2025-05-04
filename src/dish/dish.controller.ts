@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Put,
+  Query,
 } from '@nestjs/common';
 import { DishService } from './dish.service';
 import { CreateDishDto } from './dto/create-dish.dto';
@@ -31,7 +32,20 @@ export class DishController {
   create(@User() user: IUser, @Body() createDishDto: CreateDishDto) {
     return this.dishService.create(user, createDishDto);
   }
-
+  @Get('search')
+  async searchDishes(
+    @Query('brand') brand?: string,
+    @Query('type') type?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+  ) {
+    return this.dishService.findDishes({
+      brand,
+      type,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    });
+  }
   @Public()
   @ResponseMessage('Get all dishes no favorite')
   @Get('')

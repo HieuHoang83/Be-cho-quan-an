@@ -117,7 +117,7 @@ export class ReviewService {
           value: review.value,
           createdAt: review.createdAt,
           guestname: review.guest?.user.name,
-          isMyEvalte: review.guest?.user.id == user.guestId, // Truy cập tên người dùng từ guest
+          isMyEvalte: review.guest?.user.id == user.id, // Truy cập tên người dùng từ guest
         };
       });
     } catch (error) {

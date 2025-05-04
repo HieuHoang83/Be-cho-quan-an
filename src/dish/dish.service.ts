@@ -93,7 +93,36 @@ export class DishService {
       avgRating: Number(avgRating.toFixed(1)),
     };
   }
+  async findDishes(filter: {
+    brand?: string;
+    type?: string;
+    minPrice?: number;
+    maxPrice?: number;
+  }) {
+    const { brand, type, minPrice, maxPrice } = filter;
 
+    return this.prisma.dish.findMany({
+      where: {
+        ...(brand && { brand }),
+        ...(type && { type }),
+        OR: [
+          {
+            priceNew: {
+              gte: minPrice ?? undefined,
+              lte: maxPrice ?? undefined,
+            },
+          },
+          {
+            priceNew: null,
+            priceOld: {
+              gte: minPrice ?? undefined,
+              lte: maxPrice ?? undefined,
+            },
+          },
+        ],
+      },
+    });
+  }
   async update(user: IUser, id: string, updateDishDto: UpdateDishDto) {
     // Tìm admin tương ứng với user hiện tại
     const admin = await this.prisma.admin.findUnique({

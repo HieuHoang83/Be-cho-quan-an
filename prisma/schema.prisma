@@ -134,6 +134,7 @@ model Dish {
   updateBy     String?
   favorites    Favorite[]
   reviews      Review[]
+  brand        String?
 }
 
 model Post {
