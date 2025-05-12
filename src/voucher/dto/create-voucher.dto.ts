@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 
 export class CreateVoucherDto {
   @IsString()
-  name: string;
+  code: string;
   @IsString()
   title: string;
 

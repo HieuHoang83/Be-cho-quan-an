@@ -24,6 +24,9 @@ export class VoucherService {
           admin: {
             connect: { id: user.adminId }, // Liên kết voucher với admin
           },
+
+          code: dto.code,
+          title: dto.title,
         },
       });
       return newVoucher;
