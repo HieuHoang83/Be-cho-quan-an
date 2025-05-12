@@ -3,6 +3,11 @@ import { Type } from 'class-transformer';
 
 export class CreateVoucherDto {
   @IsString()
+  name: string;
+  @IsString()
+  title: string;
+
+  @IsString()
   description: string;
 
   @IsDate()

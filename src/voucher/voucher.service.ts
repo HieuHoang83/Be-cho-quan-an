@@ -78,6 +78,15 @@ export class VoucherService {
     }
     return vouchers;
   }
+  async findVoucherByCode(code: string) {
+    return this.prisma.voucher.findFirst({
+      where: {
+        code: {
+          equals: code,
+        },
+      },
+    });
+  }
   async getValidVouchers() {
     try {
       const currentDate = new Date(); // Lấy ngày hiện tại

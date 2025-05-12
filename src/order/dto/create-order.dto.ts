@@ -12,9 +12,6 @@ import { Type } from 'class-transformer';
 
 class OrderDishDto {
   @IsUUID()
-  dishcartId: string;
-
-  @IsUUID()
   dishId: string;
 
   @IsInt()

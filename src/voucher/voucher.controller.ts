@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { VoucherService } from './voucher.service';
 import { CreateVoucherDto } from './dto/create-voucher.dto';
@@ -27,6 +28,10 @@ export class VoucherController {
   addVoucher(@User() user: IUser, @Body() dto: CreateVoucherDto) {
     return this.voucherService.createVoucher(user, dto);
   }
+  @Get('search-by-code')
+  async searchVoucherByCode(@Query('code') code: string) {
+    return this.voucherService.findVoucherByCode(code);
+  }
   @Patch(':id')
   @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)
@@ -44,11 +49,13 @@ export class VoucherController {
   getAll() {
     return this.voucherService.findAll();
   }
+
   @Get('valid')
   @ResponseMessage('Lấy tất cả voucher còn hiệu lực')
   getValidVouchers() {
     return this.voucherService.getValidVouchers();
   }
+
   @Delete(':id')
   @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)

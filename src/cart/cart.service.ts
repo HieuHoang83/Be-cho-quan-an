@@ -76,6 +76,23 @@ export class CartService {
       },
     });
   }
+  async removeAllCartDishesByGuestId(guestId: string) {
+    // Bước 1: Tìm cart theo guestId
+    const cart = await this.prisma.cart.findUnique({
+      where: { guestId },
+    });
+
+    if (!cart) {
+      throw new NotFoundException('Cart not found for guest');
+    }
+
+    // Bước 2: Xóa tất cả CartAndDish theo cartId
+    return this.prisma.cartAndDish.deleteMany({
+      where: {
+        cartId: cart.id,
+      },
+    });
+  }
   async removeManyDishesFromCart(cartDishIds: string[]) {
     return this.prisma.cartAndDish.deleteMany({
       where: {

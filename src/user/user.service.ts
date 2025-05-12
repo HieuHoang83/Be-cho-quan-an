@@ -38,6 +38,13 @@ export class UserService {
 
     return guest;
   }
+  async findUserByGestId(userId: string) {
+    const guest = await this.prismaService.guest.findUnique({
+      where: { userId: userId },
+    });
+
+    return guest;
+  }
   // ✅ Thêm user mới vào database
   async create(createUserDto: CreateUserDto) {
     const exists = await this.prismaService.user.findUnique({

@@ -86,10 +86,8 @@ export class OrderService {
         user.id,
         `Đơn hàng của bạn đang chờ xử lý với mã đơn hàng: ${order.id}`,
       );
-      const dishcartIds: string[] = dto.orderAndDish.map(
-        (item) => item.dishcartId,
-      );
-      await this.cartService.removeManyDishesFromCart(dishcartIds);
+
+      await this.cartService.removeAllCartDishesByGuestId(user.guestId);
       return order;
     } catch (error) {
       throw new BadRequestException(error.message);

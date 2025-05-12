@@ -6,6 +6,12 @@ import { Type } from 'class-transformer';
 export class UpdateVoucherDto {
   @IsOptional()
   @IsString()
+  name: string;
+  @IsOptional()
+  @IsString()
+  title: string;
+  @IsOptional()
+  @IsString()
   description: string;
   @IsOptional()
   @IsDate()
