@@ -33,9 +33,6 @@ export class CreateOrderDto {
   note: string;
 
   @IsString()
-  status: string;
-
-  @IsString()
   phone: string;
 
   @IsString()
