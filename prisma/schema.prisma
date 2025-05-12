@@ -169,6 +169,9 @@ model Order {
   id          String   @id @default(uuid())
   createdAt   DateTime @default(now())
   discount    Int
+  nameUser    String?
+  email       String?
+  note        String?
   phone       String?
   address     String?
   payment     Int

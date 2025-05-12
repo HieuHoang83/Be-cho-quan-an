@@ -78,6 +78,9 @@ export class OrderService {
               number: item.number,
             })),
           },
+          nameUser: dto.nameUser,
+          email: dto.email,
+          note: dto.note,
         },
         include: { orderAndDish: true },
       });

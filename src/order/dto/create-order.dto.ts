@@ -25,6 +25,12 @@ export class CreateOrderDto {
   })
   @IsString()
   type: string;
+  @IsString()
+  nameUser: string;
+  @IsString()
+  email: string;
+  @IsString()
+  note: string;
 
   @IsString()
   status: string;
