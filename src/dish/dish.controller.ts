@@ -32,6 +32,10 @@ export class DishController {
   create(@User() user: IUser, @Body() createDishDto: CreateDishDto) {
     return this.dishService.create(user, createDishDto);
   }
+  @Get('search-by-name')
+  async searchDishByName(@Query('name') name: string) {
+    return this.dishService.findDishesByName(name);
+  }
   @Get('search')
   async searchDishes(
     @Query('brand') brand?: string,

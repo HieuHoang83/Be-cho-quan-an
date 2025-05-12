@@ -39,7 +39,15 @@ export class DishService {
       throw new BadRequestException('Không thể tạo món ăn: ' + error.message);
     }
   }
-
+  async findDishesByName(name: string) {
+    return this.prisma.dish.findMany({
+      where: {
+        name: {
+          contains: name,
+        },
+      },
+    });
+  }
   async findAll(paginateInfo: PaginateInfo) {
     return this.prisma.dish.findMany({
       orderBy: { createdAt: 'desc' },
