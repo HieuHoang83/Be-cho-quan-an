@@ -7,6 +7,7 @@ import { DishService } from 'src/dish/dish.service';
 import { VoucherModule } from 'src/voucher/voucher.module';
 import { VoucherService } from 'src/voucher/voucher.service';
 import { NotifyService } from 'src/notify/notify.service';
+import { CartService } from 'src/cart/cart.service';
 
 @Module({
   controllers: [OrderController],
@@ -16,6 +17,7 @@ import { NotifyService } from 'src/notify/notify.service';
     DishService,
     VoucherService,
     NotifyService,
+    CartService,
   ],
 })
 export class OrderModule {}

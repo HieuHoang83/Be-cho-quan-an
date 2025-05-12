@@ -76,7 +76,15 @@ export class CartService {
       },
     });
   }
-
+  async removeManyDishesFromCart(cartDishIds: string[]) {
+    return this.prisma.cartAndDish.deleteMany({
+      where: {
+        id: {
+          in: cartDishIds,
+        },
+      },
+    });
+  }
   // Lấy tất cả món trong giỏ
   async findByUser(user: IUser) {
     return this.prisma.cartAndDish.findMany({

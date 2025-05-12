@@ -11,6 +11,7 @@ import { VoucherService } from 'src/voucher/voucher.service';
 import { DishService } from 'src/dish/dish.service';
 import { NotifyService } from 'src/notify/notify.service';
 import { GetTotalPriceDto } from './dto/getTotalPrice.dto';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class OrderService {
@@ -19,6 +20,7 @@ export class OrderService {
     private voucherService: VoucherService,
     private notifyService: NotifyService,
     private dishService: DishService,
+    private cartService: CartService,
   ) {}
 
   async createOrder(user: IUser, dto: CreateOrderDto) {
@@ -84,6 +86,10 @@ export class OrderService {
         user.id,
         `Đơn hàng của bạn đang chờ xử lý với mã đơn hàng: ${order.id}`,
       );
+      const dishcartIds: string[] = dto.orderAndDish.map(
+        (item) => item.dishcartId,
+      );
+      await this.cartService.removeManyDishesFromCart(dishcartIds);
       return order;
     } catch (error) {
       throw new BadRequestException(error.message);
