@@ -300,6 +300,7 @@ export class OrderService {
           nameDish: item.dish.name,
           number: item.number,
           url: item.dish.url,
+          cost: item.dish.priceNew,
         })),
       }));
 
