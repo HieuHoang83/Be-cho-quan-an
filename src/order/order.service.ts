@@ -291,6 +291,10 @@ export class OrderService {
         status: order.status,
         type: order.type,
         description: order.description,
+        nameUser: order.nameUser,
+        email: order.email,
+        note: order.note,
+
         listOrder: order.orderAndDish.map((item) => ({
           dishId: item.dishId,
           nameDish: item.dish.name,
