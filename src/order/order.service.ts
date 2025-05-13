@@ -56,7 +56,7 @@ export class OrderService {
 
       // 👉 Áp dụng giảm giá
 
-      const discountPercent = voucher.discount;
+      const discountPercent = voucher?.discount || 0;
       const finalPayment = Math.floor((total * (100 - discountPercent)) / 100);
 
       const order = await this.prisma.order.create({
