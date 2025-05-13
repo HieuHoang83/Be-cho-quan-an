@@ -39,14 +39,37 @@ export class DishService {
       throw new BadRequestException('Không thể tạo món ăn: ' + error.message);
     }
   }
-  async findDishesByName(name: string) {
-    return this.prisma.dish.findMany({
+  async findDishesByName(name: string, paginateInfo: PaginateInfo) {
+    // Đếm tổng số món ăn khớp tên
+    const totalItems = await this.prisma.dish.count({
       where: {
         name: {
           contains: name,
+          mode: 'insensitive', // không phân biệt hoa thường
         },
       },
     });
+
+    const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
+    // Lấy dữ liệu theo trang
+    const dishes = await this.prisma.dish.findMany({
+      where: {
+        name: {
+          contains: name,
+          mode: 'insensitive',
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: paginateInfo.offset,
+      take: paginateInfo.limit,
+    });
+
+    return {
+      dishes,
+      totalItems,
+      totalPages,
+    };
   }
   async findAll(paginateInfo: PaginateInfo) {
     const totalItems = await this.prisma.dish.count(); // Đếm tổng số bản ghi
@@ -117,35 +140,58 @@ export class DishService {
       avgRating: Number(avgRating.toFixed(1)),
     };
   }
-  async findDishes(filter: {
-    brand?: string;
-    type?: string;
-    minPrice?: number;
-    maxPrice?: number;
-  }) {
+  async findDishes(
+    filter: {
+      brand?: string;
+      type?: string;
+      minPrice?: number;
+      maxPrice?: number;
+    },
+    paginateInfo: PaginateInfo,
+  ) {
     const { brand, type, minPrice, maxPrice } = filter;
 
-    return this.prisma.dish.findMany({
-      where: {
-        ...(brand && { brand }),
-        ...(type && { type }),
-        OR: [
-          {
-            priceNew: {
-              gte: minPrice ?? undefined,
-              lte: maxPrice ?? undefined,
-            },
+    // Điều kiện lọc
+    const whereCondition = {
+      ...(brand && { brand }),
+      ...(type && { type }),
+      OR: [
+        {
+          priceNew: {
+            gte: minPrice ?? undefined,
+            lte: maxPrice ?? undefined,
           },
-          {
-            priceNew: null,
-            priceOld: {
-              gte: minPrice ?? undefined,
-              lte: maxPrice ?? undefined,
-            },
+        },
+        {
+          priceNew: null,
+          priceOld: {
+            gte: minPrice ?? undefined,
+            lte: maxPrice ?? undefined,
           },
-        ],
-      },
+        },
+      ],
+    };
+
+    // Tổng số món ăn sau khi lọc
+    const totalItems = await this.prisma.dish.count({
+      where: whereCondition,
     });
+
+    const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
+    // Lấy dữ liệu theo trang
+    const dishes = await this.prisma.dish.findMany({
+      where: whereCondition,
+      orderBy: { createdAt: 'desc' },
+      skip: paginateInfo.offset,
+      take: paginateInfo.limit,
+    });
+
+    return {
+      dishes,
+      totalItems,
+      totalPages,
+    };
   }
   async update(user: IUser, id: string, updateDishDto: UpdateDishDto) {
     // Tìm admin tương ứng với user hiện tại

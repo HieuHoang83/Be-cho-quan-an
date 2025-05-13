@@ -33,22 +33,29 @@ export class DishController {
     return this.dishService.create(user, createDishDto);
   }
   @Get('search-by-name')
-  async searchDishByName(@Query('name') name: string) {
-    return this.dishService.findDishesByName(name);
+  async searchDishByName(
+    @Query('name') name: string,
+    @GetPaginateInfo() paginateInfo: PaginateInfo,
+  ) {
+    return this.dishService.findDishesByName(name, paginateInfo);
   }
   @Get('search')
   async searchDishes(
+    @GetPaginateInfo() paginateInfo: PaginateInfo,
     @Query('brand') brand?: string,
     @Query('type') type?: string,
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string,
   ) {
-    return this.dishService.findDishes({
-      brand,
-      type,
-      minPrice: minPrice ? Number(minPrice) : undefined,
-      maxPrice: maxPrice ? Number(maxPrice) : undefined,
-    });
+    return this.dishService.findDishes(
+      {
+        brand,
+        type,
+        minPrice: minPrice ? Number(minPrice) : undefined,
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      },
+      paginateInfo,
+    );
   }
   @Public()
   @ResponseMessage('Get all dishes no favorite')
