@@ -16,6 +16,8 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { ResponseMessage, User } from 'src/decorators/customize';
 import { RolesGuard } from 'src/core/roles.guard';
 import { IUser } from 'src/interface/users.interface';
+import { GetPaginateInfo } from 'src/core/query.guard';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Controller('voucher')
 export class VoucherController {
@@ -46,14 +48,14 @@ export class VoucherController {
   @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)
   @ResponseMessage('Lấy tất cả voucher')
-  getAll() {
-    return this.voucherService.findAll();
+  getAll(@GetPaginateInfo() paginateInfo: PaginateInfo) {
+    return this.voucherService.findAll(paginateInfo);
   }
 
   @Get('valid')
   @ResponseMessage('Lấy tất cả voucher còn hiệu lực')
-  getValidVouchers() {
-    return this.voucherService.getValidVouchers();
+  getValidVouchers(@GetPaginateInfo() paginateInfo: PaginateInfo) {
+    return this.voucherService.getValidVouchers(paginateInfo);
   }
 
   @Delete(':id')

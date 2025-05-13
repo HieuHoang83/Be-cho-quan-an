@@ -13,6 +13,8 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/core/roles.guard';
 import { ResponseMessage, User } from 'src/decorators/customize';
 import { IUser } from 'src/interface/users.interface';
+import { GetPaginateInfo } from 'src/core/query.guard';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Controller('favorite')
 export class FavoriteController {
@@ -31,8 +33,11 @@ export class FavoriteController {
   @Roles('Guest')
   @UseGuards(RolesGuard)
   @ResponseMessage('Lấy danh sách yêu thích thành công')
-  getFavorites(@User() user: IUser) {
-    return this.favoriteService.getFavorites(user);
+  getFavorites(
+    @User() user: IUser,
+    @GetPaginateInfo() paginateInfo: PaginateInfo,
+  ) {
+    return this.favoriteService.getFavorites(user, paginateInfo);
   }
 
   // Xoá món ăn khỏi danh sách yêu thích

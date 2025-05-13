@@ -17,6 +17,8 @@ import { ResponseMessage, User } from 'src/decorators/customize';
 import { IUser } from 'src/interface/users.interface';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { GetTotalPriceDto } from './dto/getTotalPrice.dto';
+import { GetPaginateInfo } from 'src/core/query.guard';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Controller('order')
 export class OrderController {
@@ -36,13 +38,16 @@ export class OrderController {
   @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)
   @ResponseMessage('Lấy tất cả đơn hàng')
-  findAll() {
-    return this.orderService.findAll();
+  findAll(@GetPaginateInfo() paginateInfo: PaginateInfo) {
+    return this.orderService.findAll(paginateInfo);
   }
   @Get('guest')
   @ResponseMessage('Đơn hàng theo người dùng')
-  findByGuest(@User() user: IUser) {
-    return this.orderService.findByGuestId(user.guestId);
+  findByGuest(
+    @GetPaginateInfo() paginateInfo: PaginateInfo,
+    @User() user: IUser,
+  ) {
+    return this.orderService.findByGuestId(user.guestId, paginateInfo);
   }
   @Get(':id')
   @ResponseMessage('Lấy chi tiết đơn hàng')

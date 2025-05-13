@@ -49,13 +49,25 @@ export class DishService {
     });
   }
   async findAll(paginateInfo: PaginateInfo) {
-    return this.prisma.dish.findMany({
+    const totalItems = await this.prisma.dish.count(); // Đếm tổng số bản ghi
+    const totalPages = Math.ceil(totalItems / paginateInfo.limit); // Tính tổng số trang
+
+    // Lấy dữ liệu theo phân trang
+    const dishes = await this.prisma.dish.findMany({
       orderBy: { createdAt: 'desc' },
       skip: paginateInfo.offset, // Bỏ qua các bản ghi trước offset
-      take: paginateInfo.limit,
+      take: paginateInfo.limit, // Lấy số bản ghi giới hạn theo limit
     });
+
+    return {
+      dishes, // Dữ liệu món ăn
+      totalItems, // Tổng số bản ghi
+      totalPages, // Tổng số trang
+    };
   }
   async findAllWithFavoriteFlag(paginateInfo: PaginateInfo, user: IUser) {
+    const totalItems = await this.prisma.dish.count(); // Đếm tổng số món ăn
+    const totalPages = Math.ceil(totalItems / paginateInfo.limit); // Tính tổng số trang
     const [dishes, favorites] = await Promise.all([
       this.prisma.dish.findMany({
         skip: paginateInfo.offset,
@@ -69,10 +81,14 @@ export class DishService {
 
     const favoriteIds = new Set(favorites.map((f) => f.dishId));
 
-    return dishes.map((dish) => ({
-      ...dish,
-      isFavorite: favoriteIds.has(dish.id),
-    }));
+    return {
+      dishes: dishes.map((dish) => ({
+        ...dish,
+        isFavorite: favoriteIds.has(dish.id), // Kiểm tra món ăn có được yêu thích không
+      })),
+      totalItems, // Tổng số món ăn trong cơ sở dữ liệu
+      totalPages, // Tổng số trang
+    };
   }
   async findOne(id: string) {
     const dish = await this.prisma.dish.findUnique({

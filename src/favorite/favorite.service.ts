@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { IUser } from 'src/interface/users.interface';
 import { PrismaService } from 'prisma/prisma.service';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Injectable()
 export class FavoriteService {
@@ -35,16 +36,27 @@ export class FavoriteService {
     }
   }
 
-  async getFavorites(user: IUser) {
+  async getFavorites(user: IUser, paginateInfo: PaginateInfo) {
+    const totalItems = await this.prisma.favorite.count({
+      where: { guestId: user.guestId },
+    });
+
+    const totalPages = Math.ceil(totalItems / paginateInfo.limit);
     const favorites = await this.prisma.favorite.findMany({
       where: { guestId: user.guestId },
       include: {
         dish: true,
       },
+      skip: paginateInfo.offset,
+      take: paginateInfo.limit,
     });
 
     // Trả về danh sách chỉ gồm thông tin món ăn
-    return favorites.map((f) => f.dish);
+    return {
+      dishes: favorites.map((f) => f.dish),
+      totalItems,
+      totalPages,
+    };
   }
   async checkFavorite(user: IUser, dishId: string) {
     const guest = await this.prisma.guest.findUnique({

@@ -12,6 +12,7 @@ import { DishService } from 'src/dish/dish.service';
 import { NotifyService } from 'src/notify/notify.service';
 import { GetTotalPriceDto } from './dto/getTotalPrice.dto';
 import { CartService } from 'src/cart/cart.service';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Injectable()
 export class OrderService {
@@ -194,16 +195,22 @@ export class OrderService {
       throw new BadRequestException(error.message);
     }
   }
-  async findAll() {
+  async findAll(paginateInfo: PaginateInfo) {
     try {
+      const totalItems = await this.prisma.order.count();
+
+      const totalPages = Math.ceil(totalItems / paginateInfo.limit);
       const orders = await this.prisma.order.findMany({
         include: {
           orderAndDish: {
             include: {
-              dish: true, // Lấy thông tin món ăn
+              dish: true,
             },
           },
         },
+        skip: paginateInfo.offset,
+        take: paginateInfo.limit,
+        orderBy: { createdAt: 'desc' }, // sắp xếp theo thời gian mới nhất
       });
 
       // Xử lý lại để trả về định dạng yêu cầu
@@ -227,7 +234,11 @@ export class OrderService {
         })),
       }));
 
-      return formattedOrders;
+      return {
+        orders: formattedOrders,
+        totalItems,
+        totalPages,
+      };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -252,8 +263,13 @@ export class OrderService {
     return this.prisma.order.delete({ where: { id } });
   }
 
-  async findByGuestId(guestId: string) {
+  async findByGuestId(guestId: string, paginateInfo: PaginateInfo) {
     try {
+      const totalItems = await this.prisma.order.count({
+        where: { guestId },
+      });
+
+      const totalPages = Math.ceil(totalItems / paginateInfo.limit);
       const orders = await this.prisma.order.findMany({
         where: { guestId },
         include: {
@@ -263,6 +279,9 @@ export class OrderService {
             },
           },
         },
+        skip: paginateInfo.offset,
+        take: paginateInfo.limit,
+        orderBy: { createdAt: 'desc' },
       });
 
       // Xử lý lại để trả về định dạng yêu cầu
@@ -283,7 +302,11 @@ export class OrderService {
         })),
       }));
 
-      return formattedOrders;
+      return {
+        orders: formattedOrders,
+        totalItems,
+        totalPages,
+      };
     } catch (error) {
       throw new BadRequestException(error.message);
     }

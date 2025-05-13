@@ -7,6 +7,7 @@ import { CreateVoucherDto } from './dto/create-voucher.dto';
 import { UpdateVoucherDto } from './dto/update-voucher.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { IUser } from 'src/interface/users.interface';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Injectable()
 export class VoucherService {
@@ -64,10 +65,21 @@ export class VoucherService {
   }
 
   // Lấy tất cả voucher
-  async findAll() {
+  async findAll(paginateInfo: PaginateInfo) {
     try {
-      const vouchers = await this.prisma.voucher.findMany();
-      return vouchers;
+      const totalItems = await this.prisma.voucher.count();
+      const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
+      const vouchers = await this.prisma.voucher.findMany({
+        skip: paginateInfo.offset,
+        take: paginateInfo.limit,
+      });
+
+      return {
+        vouchers,
+        totalItems,
+        totalPages,
+      };
     } catch (error) {
       throw new BadRequestException(
         'Không thể lấy danh sách voucher: ' + error.message,
@@ -90,21 +102,33 @@ export class VoucherService {
       },
     });
   }
-  async getValidVouchers() {
+  async getValidVouchers(paginateInfo: PaginateInfo) {
     try {
-      const currentDate = new Date(); // Lấy ngày hiện tại
-      const validVouchers = await this.prisma.voucher.findMany({
+      const currentDate = new Date();
+
+      const totalItems = await this.prisma.voucher.count({
         where: {
-          dateStart: {
-            lte: currentDate, // Lọc các voucher có ngày bắt đầu <= ngày hiện tại
-          },
-          dateEnd: {
-            gte: currentDate, // Lọc các voucher có ngày kết thúc >= ngày hiện tại
-          },
+          dateStart: { lte: currentDate },
+          dateEnd: { gte: currentDate },
         },
       });
 
-      return validVouchers;
+      const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
+      const vouchers = await this.prisma.voucher.findMany({
+        where: {
+          dateStart: { lte: currentDate },
+          dateEnd: { gte: currentDate },
+        },
+        skip: paginateInfo.offset,
+        take: paginateInfo.limit,
+      });
+
+      return {
+        vouchers,
+        totalItems,
+        totalPages,
+      };
     } catch (error) {
       throw new BadRequestException(
         'Không thể lấy voucher còn hạn: ' + error.message,

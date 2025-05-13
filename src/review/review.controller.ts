@@ -15,6 +15,8 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { ResponseMessage, User } from 'src/decorators/customize';
 import { RolesGuard } from 'src/core/roles.guard';
 import { IUser } from 'src/interface/users.interface';
+import { GetPaginateInfo } from 'src/core/query.guard';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Controller('review')
 export class ReviewController {
@@ -50,12 +52,16 @@ export class ReviewController {
 
   @Get('by-dish/:dishId')
   @ResponseMessage('Get reviews by dish')
-  getReviewsByDish(@Param('dishId') dishId: string, @User() user: IUser) {
-    return this.reviewService.getReviewsByDish(dishId, user);
+  getReviewsByDish(
+    @GetPaginateInfo() paginateInfo: PaginateInfo,
+    @Param('dishId') dishId: string,
+    @User() user: IUser,
+  ) {
+    return this.reviewService.getReviewsByDish(dishId, user, paginateInfo);
   }
   @Get('reviews')
   @ResponseMessage('Get all reviews')
-  findAllReviews() {
-    return this.reviewService.findAllReviews();
+  findAllReviews(@GetPaginateInfo() paginateInfo: PaginateInfo) {
+    return this.reviewService.findAllReviews(paginateInfo);
   }
 }

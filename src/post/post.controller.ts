@@ -16,6 +16,8 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/core/roles.guard';
 import { Public, User } from 'src/decorators/customize';
 import { IUser } from 'src/interface/users.interface';
+import { GetPaginateInfo } from 'src/core/query.guard';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Controller('posts')
 export class PostController {
@@ -30,8 +32,8 @@ export class PostController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.postService.getAllPosts();
+  findAll(@GetPaginateInfo() paginateInfo: PaginateInfo) {
+    return this.postService.getAllPosts(paginateInfo);
   }
 
   @Get(':id')

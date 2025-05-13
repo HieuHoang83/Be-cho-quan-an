@@ -8,6 +8,7 @@ import { UpdateReviewDto } from './dto/update-review.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { IUser } from 'src/interface/users.interface';
 import { ReviewDto } from './dto/ReviewDto';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Injectable()
 export class ReviewService {
@@ -92,17 +93,28 @@ export class ReviewService {
   }
 
   // Lấy tất cả đánh giá của một món ăn
-  async getReviewsByDish(dishId: string, user: IUser) {
+  async getReviewsByDish(
+    dishId: string,
+    user: IUser,
+    paginateInfo: PaginateInfo,
+  ) {
     try {
+      const totalItems = await this.prisma.review.count({
+        where: { dishId },
+      });
+
+      const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
       const reviews = await this.prisma.review.findMany({
         where: { dishId },
+        skip: paginateInfo.offset,
+        take: paginateInfo.limit,
+        orderBy: { createdAt: 'desc' },
         include: {
           guest: {
-            // Lấy thông tin guest (bao gồm thông tin user liên kết)
             select: {
               user: {
-                // Lấy thông tin user liên kết với guest
-                select: { name: true, id: true }, // Lấy tên của user
+                select: { name: true, id: true },
               },
             },
           },
@@ -110,16 +122,20 @@ export class ReviewService {
         },
       });
 
-      return reviews.map((review) => {
-        return {
-          id: review.id,
-          comment: review.comment,
-          value: review.value,
-          createdAt: review.createdAt,
-          guestname: review.guest?.user.name,
-          isMyEvalte: review.guest?.user.id == user.id, // Truy cập tên người dùng từ guest
-        };
-      });
+      const formattedReviews = reviews.map((review) => ({
+        id: review.id,
+        comment: review.comment,
+        value: review.value,
+        createdAt: review.createdAt,
+        guestname: review.guest?.user.name,
+        isMyEvalte: review.guest?.user.id === user.id,
+      }));
+
+      return {
+        reviews: formattedReviews,
+        totalItems,
+        totalPages,
+      };
     } catch (error) {
       throw new BadRequestException(
         'Không thể lấy các đánh giá của món ăn: ' + error.message,
@@ -163,26 +179,37 @@ export class ReviewService {
     }
   }
 
-  async findAllReviews() {
+  async findAllReviews(paginateInfo: PaginateInfo) {
     try {
+      const totalItems = await this.prisma.review.count();
+
+      const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
       const reviews = await this.prisma.review.findMany({
+        skip: paginateInfo.offset,
+        take: paginateInfo.limit,
+        orderBy: { createdAt: 'desc' },
         include: {
-          guest: { select: { user: { select: { name: true } } } }, // Truy vấn user liên kết với guest
+          guest: { select: { user: { select: { name: true } } } },
           dish: true,
         },
       });
 
-      return reviews.map((review) => {
-        return {
-          id: review.id,
-          comment: review.comment,
-          value: review.value,
-          createdAt: review.createdAt,
-          guestname: review.guest?.user.name, // Lấy tên người dùng từ guest
-          dishId: review.dishId,
-          dish: review.dish,
-        };
-      });
+      const formattedReviews = reviews.map((review) => ({
+        id: review.id,
+        comment: review.comment,
+        value: review.value,
+        createdAt: review.createdAt,
+        guestname: review.guest?.user.name,
+        dishId: review.dishId,
+        dish: review.dish,
+      }));
+
+      return {
+        reviews: formattedReviews,
+        totalItems,
+        totalPages,
+      };
     } catch (error) {
       throw new BadRequestException(
         'Không thể lấy tất cả các đánh giá: ' + error.message,

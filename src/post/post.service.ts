@@ -5,6 +5,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { IUser } from 'src/interface/users.interface';
 import { ActionService } from 'src/action/action.service';
+import { PaginateInfo } from 'src/interface/paginate.interface';
 
 @Injectable()
 export class PostService {
@@ -121,11 +122,15 @@ export class PostService {
     });
   }
 
-  async getAllPosts() {
-    return await this.prisma.post.findMany({
+  async getAllPosts(paginateInfo: PaginateInfo) {
+    const totalItems = await this.prisma.post.count();
+    const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
+    const posts = await this.prisma.post.findMany({
+      skip: paginateInfo.offset,
+      take: paginateInfo.limit,
       orderBy: { createdAt: 'desc' },
       select: {
-        // Sử dụng select để chỉ định các trường cụ thể trả về
         id: true,
         name: true,
         title: true,
@@ -136,6 +141,12 @@ export class PostService {
         description: true,
       },
     });
+
+    return {
+      posts,
+      totalItems,
+      totalPages,
+    };
   }
 
   async deletePost(id: string, user: IUser) {
