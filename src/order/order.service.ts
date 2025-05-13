@@ -55,9 +55,6 @@ export class OrderService {
       }
 
       // 👉 Áp dụng giảm giá
-      if (!voucher) {
-        throw new BadRequestException('Voucher không tồn tại');
-      }
 
       const discountPercent = voucher.discount;
       const finalPayment = Math.floor((total * (100 - discountPercent)) / 100);

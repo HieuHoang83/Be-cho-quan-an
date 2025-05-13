@@ -117,11 +117,24 @@ export class UserService {
     offset: number;
   }) {
     try {
-      return await this.prismaService.user.findMany({
-        where: { role: 'Guest' }, // Điều kiện lấy người dùng có role là 'Guest'
-        skip: paginateInfo.offset, // Bỏ qua các bản ghi trước offset
-        take: paginateInfo.limit, // Lấy số bản ghi theo limit
+      const totalItems = await this.prismaService.user.count({
+        where: { role: 'Guest' },
       });
+
+      const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
+      const users = await this.prismaService.user.findMany({
+        where: { role: 'Guest' },
+        skip: paginateInfo.offset,
+        take: paginateInfo.limit,
+        orderBy: { createdAt: 'desc' }, // tuỳ chọn
+      });
+
+      return {
+        users,
+        totalItems,
+        totalPages,
+      };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -132,11 +145,24 @@ export class UserService {
     offset: number;
   }) {
     try {
-      return await this.prismaService.user.findMany({
-        where: { role: 'Assistant Admin' }, // Điều kiện lấy người dùng có role là 'Assistant Admin'
-        skip: paginateInfo.offset, // Bỏ qua các bản ghi trước offset
-        take: paginateInfo.limit, // Lấy số bản ghi theo limit
+      const totalItems = await this.prismaService.user.count({
+        where: { role: 'Assistant Admin' },
       });
+
+      const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
+      const users = await this.prismaService.user.findMany({
+        where: { role: 'Assistant Admin' },
+        skip: paginateInfo.offset,
+        take: paginateInfo.limit,
+        orderBy: { createdAt: 'desc' }, // tuỳ chọn
+      });
+
+      return {
+        users,
+        totalItems,
+        totalPages,
+      };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
