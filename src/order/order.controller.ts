@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -37,9 +38,12 @@ export class OrderController {
   @Get()
   @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)
-  @ResponseMessage('Lấy tất cả đơn hàng')
-  findAll(@GetPaginateInfo() paginateInfo: PaginateInfo) {
-    return this.orderService.findAll(paginateInfo);
+  @ResponseMessage('Lấy tất cả đơn hàng theo trạng thái')
+  findAll(
+    @GetPaginateInfo() paginateInfo: PaginateInfo,
+    @Query('status') status: string,
+  ) {
+    return this.orderService.findAll(paginateInfo, status);
   }
   @Get('guest')
   @ResponseMessage('Đơn hàng theo người dùng')
@@ -61,14 +65,18 @@ export class OrderController {
   updateStatus(@Param('id') idOrder: string, @Body() dto: UpdateStatusDto) {
     return this.orderService.updateStatus(idOrder, dto.status);
   }
-  @Patch('/:id')
+  @Patch('update/:id')
   @ResponseMessage('Cập nhật đơn hàng')
   @Roles('Super Admin', 'Assistant Admin')
   @UseGuards(RolesGuard)
   update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
     return this.orderService.updateOrder(id, dto);
   }
-
+  @Patch('cancel/:id')
+  @ResponseMessage('Hủy đơn hàng')
+  cancel(@Param('id') id: string) {
+    return this.orderService.updateStatus(id, 'canceled');
+  }
   @Delete(':id')
   @ResponseMessage('Xoá đơn hàng')
   remove(@Param('id') id: string) {

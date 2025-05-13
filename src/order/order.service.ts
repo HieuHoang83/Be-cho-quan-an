@@ -192,12 +192,20 @@ export class OrderService {
       throw new BadRequestException(error.message);
     }
   }
-  async findAll(paginateInfo: PaginateInfo) {
+
+  async findAll(paginateInfo: PaginateInfo, status: string) {
     try {
-      const totalItems = await this.prisma.order.count();
+      // Đếm tổng số đơn hàng theo status (nếu có truyền vào)
+      const whereClause = status ? { status: { equals: status } } : {}; // nếu không truyền status, lấy tất cả
+
+      const totalItems = await this.prisma.order.count({
+        where: whereClause,
+      });
 
       const totalPages = Math.ceil(totalItems / paginateInfo.limit);
+
       const orders = await this.prisma.order.findMany({
+        where: whereClause,
         include: {
           orderAndDish: {
             include: {
@@ -207,10 +215,9 @@ export class OrderService {
         },
         skip: paginateInfo.offset,
         take: paginateInfo.limit,
-        orderBy: { createdAt: 'desc' }, // sắp xếp theo thời gian mới nhất
+        orderBy: { createdAt: 'desc' },
       });
 
-      // Xử lý lại để trả về định dạng yêu cầu
       const formattedOrders = orders.map((order) => ({
         id: order.id,
         createdAt: order.createdAt,
