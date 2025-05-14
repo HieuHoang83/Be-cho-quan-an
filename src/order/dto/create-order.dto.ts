@@ -20,7 +20,7 @@ class OrderDishDto {
 }
 
 export class CreateOrderDto {
-  @IsIn(['cash', 'transfer'], {
+  @IsIn(['cash', 'atm', 'momo'], {
     message: 'type must be either "cash" or "transfer"',
   })
   @IsString()

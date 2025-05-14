@@ -85,7 +85,7 @@ export class OrderService {
       // Gửi thông báo cho người dùng
       const notify = await this.notifyService.create(
         user.id,
-        `Đơn hàng của bạn đang chờ xử lý với mã đơn hàng: ${order.id}`,
+        `Đơn hàng của bạn đang chờ xử lý `,
       );
 
       await this.cartService.removeAllCartDishesByGuestId(user.guestId);
@@ -161,19 +161,19 @@ export class OrderService {
       let message = '';
       switch (status) {
         case 'pending':
-          message = `Đơn hàng của bạn đang chờ xử lý với mã đơn hàng: ${order.id}`;
+          message = `Đơn hàng của bạn đang chờ xử lý `;
           break;
         case 'confirmed':
-          message = `Đơn hàng của bạn đã được xác nhận với mã đơn hàng: ${order.id}`;
+          message = `Đơn hàng của bạn đã được xác nhận `;
           break;
         case 'completed':
-          message = `Đơn hàng của bạn đã hoàn thành với mã đơn hàng: ${order.id}`;
+          message = `Đơn hàng của bạn đã hoàn thành `;
           break;
         case 'canceled':
-          message = `Đơn hàng của bạn đã bị hủy với mã đơn hàng: ${order.id}`;
+          message = `Đơn hàng của bạn đã bị hủy `;
           break;
         default:
-          message = `Trạng thái đơn hàng của bạn đã được cập nhật với mã đơn hàng: ${order.id}`;
+          message = `Trạng thái đơn hàng của bạn đã được cập nhật `;
           break;
       }
 
@@ -340,7 +340,7 @@ export class OrderService {
       });
 
       // Kiểm tra trạng thái để gửi thông báo
-      let message = `Đơn hàng của bạn đã được cập nhật với mã đơn hàng: ${updatedOrder.id}`;
+      let message = `Đơn hàng của bạn đã được cập nhật `;
 
       // Tùy chỉnh thông báo theo loại trạng thái (ví dụ: "đang xử lý", "hoàn thành" v.v.)
 

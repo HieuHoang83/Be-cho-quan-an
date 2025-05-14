@@ -27,17 +27,23 @@ export class NotifyService {
     });
   }
 
-  async update(id: string, dto: UpdateNotifyDto) {
-    // Kiểm tra xem Notify có tồn tại không
-    const existing = await this.prisma.notify.findUnique({ where: { id } });
-    if (!existing) {
-      throw new NotFoundException(`Notify with ID ${id} not found`);
-    }
+  async update(user: IUser, dto: UpdateNotifyDto) {
+    {
+      const result = await this.prisma.notify.updateMany({
+        where: {
+          userId: user.id,
+          read: false, // chỉ cập nhật những cái chưa đọc
+        },
+        data: {
+          read: true,
+        },
+      });
 
-    return this.prisma.notify.update({
-      where: { id },
-      data: dto,
-    });
+      return {
+        updatedCount: result.count,
+        message: `${result.count} notifications marked as read.`,
+      };
+    }
   }
 
   remove(id: number) {

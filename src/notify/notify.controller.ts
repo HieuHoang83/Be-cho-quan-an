@@ -26,10 +26,9 @@ export class NotifyController {
   findOne(@User() user: IUser) {
     return this.notifyService.findOne(user.id);
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNotifyDto: UpdateNotifyDto) {
-    return this.notifyService.update(id, updateNotifyDto);
+  @Patch('')
+  updateRead(@User() user: IUser, @Body() updateNotifyDto: UpdateNotifyDto) {
+    return this.notifyService.update(user, updateNotifyDto);
   }
 
   @Delete(':id')
