@@ -3,7 +3,7 @@
 #### 1. Cài đặt thư viện với câu lệnh: npm i
 #### 2. Chạy dự án với câu lệnh: npm run dev
 
-#### 3. Fe: https://github.com/TieuHungHua/Restaurent/blob/main/README.md
+#### 3. Fe: https://github.com/TieuHungHua/Restaurent
 =================
 
 
